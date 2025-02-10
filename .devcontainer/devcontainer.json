@@ -1,5 +1,5 @@
 {
-    "name": "HelloWorldProject DevContainer",
+    "name": "{{ api-name }} DevContainer",
     "context": "..",
     "dockerFile": "../docker/Dockerfile.prod",
     "runServices": [
