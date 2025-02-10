@@ -115,11 +115,8 @@ docker compose -f docker/docker-compose.test.yml run --rm web pytest --cov=src
 ## Clen Repo to Use as Boilerplate
 
 ```bash
-rm -rf src/api/v1/endpoints/hello.py src/services/hello.py \
-tests/unit/test_hello_endpoints.py \
-tests/contract/test_hello_contract.py \
-tests/integration/test_hello_integration.py \
-tests/e2e/test_hello_workflow.py
+chmod +x scripts/boilerplate.sh
+./scripts/boilerplate.sh new-app-name
 ```	
 
 ## License
