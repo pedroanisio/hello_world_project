@@ -89,13 +89,16 @@ pytest tests/e2e
 ```
 
 ### Docker Testing
+
 ```bash
-# Run migrations
-docker compose -f docker/docker-compose.test.yml run --rm web pytest --cov=src
+# Build test
+docker compose -f docker/docker-compose.test.yml build
 ```
 
-
-
+```bash
+# Run test
+docker compose -f docker/docker-compose.test.yml run --rm web pytest --cov=src
+```
 
 ## Contributing
 1. Fork the repository
