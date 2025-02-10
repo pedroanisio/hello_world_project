@@ -1,7 +1,8 @@
 # {{api-name}}
 
 ## Overview
-A production-ready FastAPI project template implementing industry best practices for API development, testing, documentation, and deployment.
+A production-ready FastAPI project template implementing industry best practices 
+for API development, testing, documentation, and deployment.
 
 ![Python Version](https://img.shields.io/badge/python-3.11-blue.svg)
 ![FastAPI Version](https://img.shields.io/badge/FastAPI-0.95.2-blue.svg)
@@ -45,9 +46,15 @@ uvicorn src.main:app --reload
 ### Docker Development
 ```bash
 # Start services
-docker compose -f docker/docker-compose.dev.yml up -d
+docker compose -f docker/docker-compose.dev.yml up --build -d
+
+# exec into the container
+docker compose -f docker/docker-compose.dev.yml exec web bash
 
 # Run migrations
+docker compose -f docker/docker-compose.dev.yml exec web alembic revision --autogenerate -m "initial"
+# Create new migration
+docker compose -f docker/docker-compose.dev.yml exec web alembic revision --autogenerate -m "create users table"
 docker compose -f docker/docker-compose.dev.yml exec web alembic upgrade head
 ```
 
