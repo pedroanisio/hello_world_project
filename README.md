@@ -112,5 +112,15 @@ docker compose -f docker/docker-compose.test.yml run --rm web pytest --cov=src
 - [API Documentation](docs/api/endpoints.md)
 - [Evolution Guide](docs/evolution_guide.md)
 
+## Clen Repo to Use as Boilerplate
+
+```bash
+rm -rf src/api/v1/endpoints/hello.py src/services/hello.py \
+tests/unit/test_hello_endpoints.py \
+tests/contract/test_hello_contract.py \
+tests/integration/test_hello_integration.py \
+tests/e2e/test_hello_workflow.py
+```	
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
