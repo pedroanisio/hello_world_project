@@ -1,13 +1,14 @@
 # Deployment Guide
 
 ## Version
-2.0.0
+1.0.0
 
 ## Last Updated
-2025-02-09
+09/fev/2025
 
 ## Overview
-This guide covers the deployment process for the Hello World Project, including different environments, configuration, and maintenance procedures.
+This guide covers the deployment process for the {{ project_name }} Project, 
+including different environments, configuration, and maintenance procedures.
 
 ## Table of Contents
 1. [Deployment Environments](#deployment-environments)

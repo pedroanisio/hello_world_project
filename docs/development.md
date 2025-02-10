@@ -1,21 +1,24 @@
 # Development Guide
 
 ## Version
-2.0.0
+1.0.1
 
 ## Last Updated
-2025-02-09
+2025-02-10
 
 ## Overview
-This guide outlines development standards and practices for the Hello World Project. It serves as the primary reference for developers working on the project.
+This guide outlines development standards and practices for the **{{ project_name }}** codebase.  
+It serves as the primary reference for developers working on the project.
 
 ## Table of Contents
-1. [Development Environment](#development-environment)
-2. [Code Organization](#code-organization)
-3. [Coding Standards](#coding-standards)
-4. [Testing Guidelines](#testing-guidelines)
-5. [Version Control](#version-control)
-6. [Documentation](#documentation)
+1. [Development Environment](#development-environment)  
+2. [Code Organization](#code-organization)  
+3. [Coding Standards](#coding-standards)  
+4. [Testing Guidelines](#testing-guidelines)  
+5. [Version Control](#version-control)  
+6. [Documentation](#documentation)  
+
+---
 
 ## Development Environment
 
@@ -41,24 +44,75 @@ Recommended VS Code settings:
 ### Virtual Environment
 ```bash
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # On Linux/Mac
+# or
+.\venv\Scripts\activate  # On Windows
+
 pip install -r requirements.dev.txt
 ```
+
+---
 
 ## Code Organization
 
 ### Directory Structure
-[Directory structure details from original]
+```plaintext
+{{ project_name }}/
+├── src/
+│   ├── api/
+│   ├── core/
+│   ├── db/
+│   ├── schemas/
+│   ├── services/
+├── docs/
+├── docker/
+│   ├── docker-compose.prod.yml
+│   ├── docker-compose.dev.yml
+│   ├── docker-compose.test.yml
+│   ├── Dockerfile.prod
+│   ├── Dockerfile.dev
+│   ├── Dockerfile.test
+├── migrations/
+│   ├── versions/
+│   ├── env.py
+├── tests/
+│   ├── contract/
+│   ├── performance/
+│   ├── property_based/
+│   ├── unit/
+│   ├── integration/
+│   ├── __init__.py
+│   ├── conftest.py
+├── scripts/
+│   ├── db/
+│   ├── migrations/
+│   ├── tests/
+│   ├── utils/
+├── .gitignore
+├── .pre-commit-config.yaml
+├── .vscode/
+├── .env.test
+├── .env.dev
+├── .env.prod
+├── requirements.dev.txt
+├── requirements.prod.txt
+├── requirements.test.txt
+├── pyproject.toml
+├── README.md
+├── CHANGELOG.md
+```
 
 ### File Naming Conventions
-- Use lowercase
-- Use underscores for separation
-- Be descriptive but concise
-- Follow the "one thing, one file" principle
+- Use lowercase.
+- Use underscores for separation.
+- Be descriptive but concise.
+- Follow the “one thing, one file” principle.
 
 ### Module Organization
 ```python
-"""Module docstring explaining purpose."""
+"""
+Module docstring explaining purpose.
+"""
 
 # Standard library imports
 import os
@@ -90,48 +144,68 @@ if __name__ == "__main__":
     my_function()
 ```
 
+---
+
 ## Coding Standards
 
 ### Python Style
-- Follow PEP 8
-- Use type hints
-- Maximum line length: 88 characters
-- Use descriptive variable names
+- [PEP 8](https://peps.python.org/pep-0008/): Style Guide for Python Code  
+- [PEP 257](https://peps.python.org/pep-0257/): Docstring Conventions  
+- [PEP 484](https://peps.python.org/pep-0484/): Type Hints  
+- [PEP 526](https://peps.python.org/pep-0526/): Syntax for Variable Annotations  
+- [PEP 561](https://peps.python.org/pep-0561/): Packaging and Distributing Type Information  
+- [PEP 544](https://peps.python.org/pep-0544/): Protocols (for advanced type-checking)  
+- [PEP 570](https://peps.python.org/pep-0570/): Positional-Only Parameters (can be relevant for advanced type usage)  
+- Use type hints throughout.  
+- Maximum line length: 88 characters.  
+- Use descriptive variable names.
 
 ### FastAPI Best Practices
-- Use dependency injection
-- Implement proper error handling
-- Use Pydantic models for validation
-- Implement proper response models
+- Use dependency injection.  
+- Implement proper error handling.  
+- Use Pydantic models for validation.  
+- Implement proper response models.  
+- Use routers to structure endpoints when appropriate.
 
 ### Database Practices
-- Use SQLAlchemy models
-- Implement proper migrations
-- Use database transactions
-- Handle connection pooling
+- Use SQLAlchemy models.  
+- Implement proper migrations.  
+- Use database transactions.  
+- Handle connection pooling.
+
+---
 
 ## Testing Guidelines
 
 ### Test Types
-1. Unit Tests
-   - Test individual components
-   - Use pytest fixtures
-   - Mock external dependencies
 
-2. Integration Tests
-   - Test component interactions
-   - Use test database
-   - Reset state between tests
+1. **Unit Tests**  
+   - Test individual components.  
+   - Use pytest fixtures.  
+   - Mock external dependencies.
 
-3. End-to-End Tests
-   - Test complete workflows
-   - Use prod-like environment
-   - Clean up test data
+2. **Integration Tests**  
+   - Test component interactions.  
+   - Use a test database.  
+   - Reset state between tests.
 
-4. Performance Tests
-   - Test under load
-   - Measure response times
-   - Check resource usage
+3. **End-to-End Tests**  
+   - Test complete workflows.  
+   - Use a production-like environment.  
+   - Clean up test data.
+
+4. **Performance Tests**  
+   - Test under load.  
+   - Measure response times.  
+   - Check resource usage.
+
+5. **Contract Tests** (if relevant)  
+   - Validate contracts with external services.  
+   - Ensure backward compatibility between versions.
+
+6. **Property-Based Tests** (if relevant)  
+   - Use randomly generated inputs.  
+   - Check if the code holds for all valid inputs.
 
 ### Test Writing Standards
 ```python
@@ -144,14 +218,16 @@ def test_feature():
     # Test implementation
 ```
 
+---
+
 ## Version Control
 
 ### Branch Strategy
-- main: Production code
-- develop: Development code
-- feature/*: New features
-- bugfix/*: Bug fixes
-- release/*: Release preparation
+- **main**: Production code  
+- **develop**: Development code  
+- **feature/\***: New features  
+- **bugfix/\***: Bug fixes  
+- **release/\***: Release preparation
 
 ### Commit Messages
 ```
@@ -163,26 +239,28 @@ Fixes #123
 ```
 
 ### Pull Requests
-- Use PR template
-- Include tests
-- Update documentation
-- Add migration scripts if needed
+- Use a PR template.  
+- Include tests.  
+- Update documentation.  
+- Add migration scripts if needed.
+
+---
 
 ## Documentation
 
 ### Code Documentation
-- Use docstrings
-- Include type hints
-- Document exceptions
-- Add usage examples
+- Use docstrings for all modules, classes, and functions.  
+- Include type hints to clarify function parameters and return types.  
+- Document exceptions that might be raised.  
+- Add usage examples where appropriate.
 
 ### API Documentation
-- Update OpenAPI specs
-- Include request/response examples
-- Document error responses
-- Note rate limits
+- Update OpenAPI specs automatically or manually as needed.  
+- Include request/response examples.  
+- Document error responses.  
+- Mention any rate limits or authentication requirements.
 
 ### Changelog
-- Keep CHANGELOG.md updated
-- Follow semantic versioning
-- Include migration notes 
+- Keep `CHANGELOG.md` updated.  
+- Follow semantic versioning.  
+- Include migration notes when relevant.

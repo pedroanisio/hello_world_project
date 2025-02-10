@@ -7,7 +7,8 @@
 2025-02-09
 
 ## Overview
-This document describes the system architecture of the Hello World Project, including its components, interactions, and design decisions.
+This document describes the system architecture of the {{ project_name }} Project, 
+including its components, interactions, and design decisions.
 
 ## Table of Contents
 1. [System Overview](#system-overview)
