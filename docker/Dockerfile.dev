@@ -4,8 +4,7 @@ WORKDIR /app
 
 COPY requirements.prod.txt .
 COPY requirements.dev.txt .
-COPY requirements.test.txt .
-RUN pip install --no-cache-dir -r requirements.test.txt
+RUN pip install --no-cache-dir -r requirements.dev.txt
 
 COPY . .
 
