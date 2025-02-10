@@ -2,6 +2,8 @@ FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
+ENV ENVIRONMENT=test
+
 COPY requirements.prod.txt .
 COPY requirements.dev.txt .
 COPY requirements.test.txt .
