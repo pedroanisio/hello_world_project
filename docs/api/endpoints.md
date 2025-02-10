@@ -7,7 +7,7 @@
 2025-02-09
 
 ## Overview
-This document details the API endpoints, request/response formats, and authentication requirements for the Hello World Project.
+This document details the API endpoints, request/response formats, and authentication requirements for {{api-name }}.
 
 ## Table of Contents
 1. [Authentication](#authentication)
