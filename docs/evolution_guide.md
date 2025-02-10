@@ -7,7 +7,7 @@
 2025-02-09
 
 ## Overview
-This document provides guidance on evolving and maintaining the Hello World Project over time, ensuring it remains modern, secure, and maintainable.
+This document provides guidance on evolving and maintaining the {{ api-name }} over time, ensuring it remains modern, secure, and maintainable.
 
 ## Table of Contents
 1. [Version Management](#version-management)
