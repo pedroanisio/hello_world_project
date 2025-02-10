@@ -1,4 +1,4 @@
-# Hello World Project
+# {{api-name}}
 
 ## Overview
 A production-ready FastAPI project template implementing industry best practices for API development, testing, documentation, and deployment.
