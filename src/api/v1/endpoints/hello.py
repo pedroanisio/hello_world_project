@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.services.hello_service import get_hello_message
+from src.services.hello import get_hello_message
 
 router = APIRouter(tags=["hello"])
 

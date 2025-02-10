@@ -1,4 +1,14 @@
 services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.test
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-test_db}
+      PYTHONPATH: /app
+
   db:
     image: postgres:16
     environment:

@@ -88,6 +88,15 @@ pytest tests/integration
 pytest tests/e2e
 ```
 
+### Docker Testing
+```bash
+# Run migrations
+docker compose -f docker/docker-compose.test.yml run --rm web pytest --cov=src
+```
+
+
+
+
 ## Contributing
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
