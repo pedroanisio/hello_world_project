@@ -2,7 +2,7 @@ import os
 from pydantic import BaseSettings
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Hello World API"
+    PROJECT_NAME: str = "{{api-name}}"
     API_VERSION: str = "v1"
     DATABASE_URL: str = "postgresql://user:password@localhost:5432/dbname"
     TEST_DATABASE_URL: str = "postgresql://user:password@localhost:5432/test_db"
