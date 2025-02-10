@@ -1,0 +1,10 @@
+[tool.poetry]
+name = "hello_world_project"
+version = "1.3.2"
+description = "A Hello World FastAPI project."
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.dev-dependencies]
