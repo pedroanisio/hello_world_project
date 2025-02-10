@@ -45,10 +45,10 @@ uvicorn src.main:app --reload
 ### Docker Development
 ```bash
 # Start services
-docker-compose -f docker/docker-compose.dev.yml up -d
+docker compose -f docker/docker-compose.dev.yml up -d
 
 # Run migrations
-docker-compose -f docker/docker-compose.dev.yml exec web alembic upgrade head
+docker compose -f docker/docker-compose.dev.yml exec web alembic upgrade head
 ```
 
 ## Development Tools
