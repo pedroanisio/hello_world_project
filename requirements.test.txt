@@ -4,3 +4,8 @@ pytest-cov
 pytest-mock
 pytest-asyncio
 httpx
+flake8
+black
+isort
+bandit
+safety
