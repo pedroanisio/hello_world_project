@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     # Logging Configuration
     LOG_LEVEL: str = "INFO"  # Logging level with default="INFO"
 
+    # New settings
+    HOST: str = "127.0.0.1"  # Default to localhost
+    PORT: int = 8000
+
     # Validator method
     @validator("DATABASE_URL", pre=True)
     def validate_database_url(cls, v: str, values: Dict[str, Any]) -> str:
