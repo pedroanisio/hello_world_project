@@ -1,10 +1,11 @@
-import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import Mock
 
+import pytest
+from fastapi.testclient import TestClient
+
+from src.core.security import get_password_hash
 from src.core.token_manager import create_access_token
 from src.db.models.user import User
-from src.core.security import get_password_hash
 
 
 def test_auth_endpoints():

@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
+from src.api.v1.dependencies.auth import get_current_user
+from src.core.exceptions import PasswordTooWeakException
 from src.db.session import get_db
 from src.services.user import user_create_service, user_read_service
-from src.core.exceptions import PasswordTooWeakException
-from src.api.v1.dependencies.auth import get_current_user
 
 
 class UserCreate(BaseModel):

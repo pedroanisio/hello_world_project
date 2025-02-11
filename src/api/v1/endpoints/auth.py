@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from src.utils.logging import logger
+
+from src.core.config import settings
+from src.core.exceptions import InvalidTokenError
 from src.core.security import verify_password
 from src.core.token_manager import (
     create_access_token,
@@ -12,8 +14,7 @@ from src.core.token_manager import (
 )
 from src.db.repositories import get_user_by_email
 from src.db.session import get_db
-from src.core.exceptions import InvalidTokenError
-from src.core.config import settings
+from src.utils.logging import logger
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")

@@ -3,10 +3,11 @@ from datetime import datetime, timedelta
 from typing import Dict, Set
 
 from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError, InvalidHashError
-from fastapi import HTTPException, Request, FastAPI
-from starlette.middleware.base import BaseHTTPMiddleware
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
+from fastapi import FastAPI, HTTPException, Request
 from passlib.context import CryptContext
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from src.core.config import settings
 from src.core.exceptions import PasswordTooWeakException
 from src.utils.logging import logger

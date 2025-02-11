@@ -1,6 +1,7 @@
+import time
+
 import pytest
 from fastapi.testclient import TestClient
-import time
 
 
 def test_complete_auth_workflow(client, test_db):
