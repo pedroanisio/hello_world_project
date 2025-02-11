@@ -45,7 +45,7 @@
 - [ ] Vault integration
 - [ ] Container scanning
 - [ ] SAST/DAST scanning
-- [ ] Dependency scanning
+- [x] Dependency scanning
 - [ ] Image signing
 - [ ] WAF configuration
 - [ ] Network policies
@@ -79,9 +79,9 @@
 
 ## CI/CD Pipeline
 ### Build & Test
-- [ ] Automated testing
-- [ ] Code quality checks
-- [ ] Security scans
+- [x] Automated testing
+- [x] Code quality checks
+- [x] Security scans
 - [ ] Image building
 - [ ] Artifact versioning
 
