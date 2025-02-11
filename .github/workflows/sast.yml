@@ -19,9 +19,9 @@ jobs:
       - name: Run Semgrep Analysis
         run: |
           semgrep ci \
-            --config "p/python" \
-            --config "p/owasp-top-ten" \
-            --config "p/security-audit" \
-            --severity ERROR
+              --config "p/python" \
+              --config "p/owasp-top-ten" \
+              --config "p/security-audit"
+
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }} 
