@@ -1,6 +1,8 @@
-import time
-import psycopg2
 import os
+import time
+
+import psycopg2
+
 from src.core.config import settings
 
 

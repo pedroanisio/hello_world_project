@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import subprocess
-from pathlib import Path
-from enum import Enum
 import curses
-import questionary
-from rich.console import Console
-from rich import print as rprint
+import os
+import subprocess
+import sys
 import time
-from typing import Optional, List, Dict
-from threading import Lock
 from collections import deque
 from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from threading import Lock
+from typing import Dict, List, Optional
+
+import questionary
+from rich import print as rprint
+from rich.console import Console
 
 SCRIPT_PATH = Path(__file__).resolve()
 PROJECT_ROOT = Path(

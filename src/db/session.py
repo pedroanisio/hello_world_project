@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import sessionmaker
+
 from src.core.config import settings
 from src.utils.logging import logger
-
 
 engine = create_engine(
     settings.DATABASE_URL,

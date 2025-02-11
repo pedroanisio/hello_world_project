@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
-from src.db.models.user import User
 from src.core.security import get_password_hash
+from src.db.models.user import User
 
 
 def create_user_repo(db_session: Session, email: str, password: str):

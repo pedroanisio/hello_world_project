@@ -1,6 +1,7 @@
 # src/core/config.py
+from typing import Any, Dict
+
 from pydantic import BaseSettings, validator
-from typing import Dict, Any
 
 
 class Settings(BaseSettings):

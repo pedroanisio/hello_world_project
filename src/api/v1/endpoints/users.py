@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
+from sqlalchemy.orm import Session
 
 from src.db.session import get_db
 from src.services.user import user_create_service, user_read_service

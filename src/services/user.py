@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 
-from src.db.repositories import create_user_repo, get_user_repo
-from src.core.security import validate_password_strength
 from src.core.exceptions import PasswordTooWeakException
+from src.core.security import validate_password_strength
+from src.db.repositories import create_user_repo, get_user_repo
 
 
 def user_create_service(db: Session, email: str, password: str):

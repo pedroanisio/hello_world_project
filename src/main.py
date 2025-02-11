@@ -1,17 +1,18 @@
+import time
+
+import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import JSONResponse
+from prometheus_client import Counter, Histogram
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from prometheus_client import Counter, Histogram
-import time
-import structlog
 
-from src.core.config import settings
-from src.core.security import setup_security
-from src.core.error_handlers import setup_exception_handlers
 from src.api.v1.routers import api_router
+from src.core.config import settings
+from src.core.error_handlers import setup_exception_handlers
+from src.core.security import setup_security
 
 # Metrics
 REQUEST_COUNT = Counter(

@@ -2,13 +2,14 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import JSONResponse
-from src.utils.logging import logger
+
 from src.core.exceptions import (
+    CustomAppException,
     InvalidTokenError,
     PasswordTooWeakException,
     UserNotFoundError,
-    CustomAppException,
 )
+from src.utils.logging import logger
 
 
 async def invalid_token_handler(

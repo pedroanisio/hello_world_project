@@ -1,4 +1,5 @@
 import logging
+
 import json_log_formatter
 
 formatter = json_log_formatter.JSONFormatter()

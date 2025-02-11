@@ -1,6 +1,6 @@
-from src.db.session import SessionLocal
-from src.db.models.user import User
 from src.core.security import get_password_hash
+from src.db.models.user import User
+from src.db.session import SessionLocal
 
 
 def seed_database():
