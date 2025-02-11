@@ -5,6 +5,7 @@ passlib[bcrypt]==1.7.4
 prometheus-client==0.17.1
 psycopg2-binary
 pydantic[dotenv]==1.10.8
+pydantic[email]
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.6
 redis==4.5.5
