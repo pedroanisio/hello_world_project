@@ -21,17 +21,17 @@
 - [x] PYTHONPATH configuration
 - [x] Environment variables
 - [x] Multi-stage builds
-- [ ] Non-root user creation
-- [ ] .dockerignore file
+- [x] Non-root user creation
+- [x] .dockerignore file
 
 ### Container Management
 - [x] Database health checks
 - [x] Development volume mounts
 - [x] Environment-specific configs
-- [x ] Dynamic container names
+- [x] Dynamic container names
 - [ ] Resource limits
-- [ ] Restart policies
-- [ ] Network isolation
+- [x] Restart policies
+- [x] Network isolation
 
 ## Security Implementation
 ### Authentication & Authorization
