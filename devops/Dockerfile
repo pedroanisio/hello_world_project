@@ -40,3 +40,11 @@ USER appuser
 # Fix permissions and line endings for scripts
 RUN find /app/devops/scripts -type f -name "*.sh" -exec chmod +x {} \; && \
     find /app/devops/scripts -type f -name "*.sh" -exec sed -i 's/\r$//' {} \;
+
+# Add version and build information
+ARG VERSION
+ARG BUILD_DATE
+ARG GIT_COMMIT
+LABEL org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.revision="${GIT_COMMIT}"
