@@ -1,15 +1,16 @@
 import time
 import psycopg2
+import os
 from src.core.config import settings
 
 def wait_for_db():
     while True:
         try:
             conn = psycopg2.connect(
-                dbname="postgres",
-                user=settings.DATABASE_URL.split("://")[1].split(":")[0],
-                password=settings.DATABASE_URL.split(":")[2].split("@")[0],
-                host=settings.DATABASE_URL.split("@")[1].split(":")[0],
+                dbname=os.getenv("POSTGRES_DB"),
+                user=os.getenv("POSTGRES_USER"),
+                password=os.getenv("POSTGRES_PASSWORD"),
+                host=os.getenv("POSTGRES_HOST"),
             )
             conn.close()
             break
@@ -18,4 +19,4 @@ def wait_for_db():
             time.sleep(1)
 
 if __name__ == "__main__":
-    wait_for_db() 
+    wait_for_db()

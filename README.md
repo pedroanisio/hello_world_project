@@ -33,9 +33,6 @@ source venv/bin/activate  # or `venv\Scripts\activate` on Windows
 # Install dependencies
 pip install -r requirements.dev.txt
 
-# Set up environment
-cp .env.dev .env
-
 # Run migrations
 alembic upgrade head
 
@@ -45,11 +42,15 @@ uvicorn src.main:app --reload
 
 ### Docker Development
 ```bash
+# clean up
+docker compose --env-file devops/.env.dev -f devops/docker-compose.dev.yml down
+docker system prune; docker volume rm $(docker volume ls -q)
+
 # Start services
-docker compose -f docker/docker-compose.dev.yml up --build -d
+docker compose --env-file devops/.env.dev -f devops/docker-compose.dev.yml up --build -d
 
 # exec into the container
-docker compose -f docker/docker-compose.dev.yml exec web bash
+docker compose --env-file devops/.env.dev -f devops/docker-compose.dev.yml exec web bash
 
 # Run migrations
 docker compose -f docker/docker-compose.dev.yml exec web alembic revision --autogenerate -m "initial"
