@@ -8,6 +8,7 @@ from src.core.token_manager import (
     create_refresh_token,
     decode_token,
     invalidate_token,
+    _token_blacklist,
 )
 from src.db.repositories import get_user_by_email
 from src.db.session import get_db
@@ -55,18 +56,16 @@ async def refresh_token_endpoint(token: str = Depends(oauth2_scheme)):
         payload = decode_token(token, token_type="refresh")
         user_id = payload.get("user_id")
 
-        # Invalidate the old access token using access_jti from refresh token
-        if "access_jti" in payload:
-            logger.info(
-                f"Invalidating old access token with JTI: {payload['access_jti']}"
-            )
-            _token_blacklist.add(payload["access_jti"])
-        else:
-            logger.warning("No access_jti found in refresh token payload")
-
         # Create new access token
         new_access_token = create_access_token({"user_id": user_id})
         logger.info(f"Created new access token for user {user_id}")
+
+        # Invalidate the old access token if present in payload
+        if "access_token" in payload:
+            logger.info("Found old access token in refresh payload, invalidating...")
+            invalidate_token(payload["access_token"])
+        else:
+            logger.warning("No access token found in refresh token payload")
 
         # Invalidate the used refresh token
         logger.info("Invalidating used refresh token")
