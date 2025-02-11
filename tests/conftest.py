@@ -13,7 +13,7 @@ from src.core.token_manager import create_access_token
 @pytest.fixture
 def auth_headers():
     """Create authentication headers with test token"""
-    access_token = create_access_token(
+    access_token, _ = create_access_token(
         {
             "user_id": 1,
             "type": "access",

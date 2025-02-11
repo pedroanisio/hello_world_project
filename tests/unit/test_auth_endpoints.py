@@ -91,3 +91,41 @@ def test_protected_route(client):
         "/api/v1/auth/protected", headers={"Authorization": "Bearer invalid.token.here"}
     )
     assert response.status_code == 401
+
+
+def test_access_token_invalidation_after_refresh(client, test_db):
+    """Test that old access token is invalidated after refresh"""
+    # Setup test user
+    db = test_db()
+    test_user = User(
+        email="invalidation@example.com",
+        hashed_password=get_password_hash("TestPass123"),
+    )
+    db.add(test_user)
+    db.commit()
+
+    # Login to get tokens
+    login_response = client.post(
+        "/api/v1/auth/login",
+        data={"username": "invalidation@example.com", "password": "TestPass123"},
+    )
+    old_access_token = login_response.json()["access_token"]
+    refresh_token = login_response.json()["refresh_token"]
+
+    # Verify old access token works
+    me_response = client.get(
+        "/api/v1/users/me", headers={"Authorization": f"Bearer {old_access_token}"}
+    )
+    assert me_response.status_code == 200
+
+    # Refresh token
+    refresh_response = client.post(
+        "/api/v1/auth/refresh", headers={"Authorization": f"Bearer {refresh_token}"}
+    )
+    assert refresh_response.status_code == 200
+
+    # Verify old access token is now invalid
+    me_response = client.get(
+        "/api/v1/users/me", headers={"Authorization": f"Bearer {old_access_token}"}
+    )
+    assert me_response.status_code == 401
