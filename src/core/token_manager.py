@@ -11,7 +11,7 @@ from src.utils.logging import logger
 _token_blacklist: Set[str] = set()
 
 
-def create_access_token(data: Dict) -> str:
+def create_access_token(data: Dict, refresh_jti: str = None) -> str:
     """Create a new access token."""
     jti = str(uuid.uuid4())
     to_encode = data.copy()
@@ -22,6 +22,7 @@ def create_access_token(data: Dict) -> str:
     to_encode.update(
         {
             "jti": jti,
+            "refresh_jti": refresh_jti,
             "type": "access",
             "exp": datetime.utcnow()
             + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
@@ -36,6 +37,7 @@ def create_access_token(data: Dict) -> str:
 def create_refresh_token(data: Dict) -> str:
     """Create a new refresh token."""
     jti = str(uuid.uuid4())
+    access_jti = str(uuid.uuid4())
     to_encode = data.copy()
     audience = (
         "test-audience" if settings.ENVIRONMENT == "test" else settings.TOKEN_AUDIENCE
@@ -44,6 +46,7 @@ def create_refresh_token(data: Dict) -> str:
     to_encode.update(
         {
             "jti": jti,
+            "access_jti": access_jti,
             "type": "refresh",
             "exp": datetime.utcnow()
             + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
@@ -103,6 +106,8 @@ def invalidate_token(token: str) -> None:
         payload = jwt.decode(token, options={"verify_signature": False})
         if "jti" in payload:
             _token_blacklist.add(payload["jti"])
+            if payload.get("type") == "refresh" and "access_jti" in payload:
+                _token_blacklist.add(payload["access_jti"])
             logger.info(f"Token {payload['jti']} added to blacklist")
     except jwt.PyJWTError as e:
         raise InvalidTokenError(f"Could not invalidate token: {str(e)}")

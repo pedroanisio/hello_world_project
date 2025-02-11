@@ -4,7 +4,7 @@ from typing import Dict, Set
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, FastAPI
 from starlette.middleware.base import BaseHTTPMiddleware
 from passlib.context import CryptContext
 from src.core.config import settings
@@ -92,3 +92,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             self.requests[client_ip].append(now)
 
         return await call_next(request)
+
+
+def setup_security(app: FastAPI) -> None:
+    """Setup security middleware and configurations for the FastAPI app."""
+    # Add rate limiting middleware
+    app.add_middleware(RateLimitMiddleware)
+
+    logger.info("Security middleware and configurations have been set up")
