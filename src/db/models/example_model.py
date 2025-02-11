@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from src.db.models import Base
 
+
 class ExampleModel(Base):
     __tablename__ = "example"
 

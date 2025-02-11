@@ -21,10 +21,12 @@ DEVOPS_DIR = PROJECT_ROOT / "devops"
 
 console = Console()
 
+
 class Environment(str, Enum):
     DEV = "dev"
     PROD = "prod"
     TEST = "test"
+
 
 class LogEntry:
     """Represents a single command log entry with a timestamp, command, status, and message."""
@@ -34,6 +36,7 @@ class LogEntry:
         self.status = status
         self.message = message
 
+
 class MenuItem:
     """Represents a single menu item that can be selected in the TUI."""
     def __init__(self, key: str, label: str, description: str, action: callable):
@@ -42,6 +45,7 @@ class MenuItem:
         self.description = description
         self.action = action
 
+
 class ProjectConsole:
     """Console-style TUI for managing Docker Compose environments."""
     def __init__(self, stdscr) -> None:
@@ -49,7 +53,7 @@ class ProjectConsole:
         self.current_env = Environment.DEV
         self.running = True
         self.current_row = 0
-        
+
         # Holds command output with expanded size for more visibility
         self.command_output = deque(maxlen=15)
         self.command_log: List[LogEntry] = []
@@ -62,11 +66,11 @@ class ProjectConsole:
         """Configure curses settings."""
         curses.start_color()
         curses.use_default_colors()
-        
+
         # Simple color scheme
         curses.init_pair(1, curses.COLOR_WHITE, -1)  # Default
         curses.init_pair(2, curses.COLOR_GREEN, -1)  # Selected / success
-        curses.init_pair(3, curses.COLOR_YELLOW, -1) # Highlight / command
+        curses.init_pair(3, curses.COLOR_YELLOW, -1)  # Highlight / command
         curses.init_pair(4, curses.COLOR_CYAN, -1)   # Header
         curses.init_pair(5, curses.COLOR_RED, -1)    # Errors
 
@@ -111,14 +115,14 @@ class ProjectConsole:
                 menu_line.append(f"{item.key}:{item.label}")
             menu_str = " | ".join(menu_line)
             self.stdscr.addstr(3, 2, menu_str, curses.color_pair(3))
-            
+
             # Separator
             self.stdscr.addstr(4, 0, "-" * width, curses.color_pair(1))
 
             # Command output area
             output_start = 5
             max_output_lines = height - output_start - 1
-            
+
             lines_to_show = list(self.command_output)[-max_output_lines:]
             line_idx = 0
             while line_idx < len(lines_to_show):
@@ -149,7 +153,7 @@ class ProjectConsole:
 
             self.stdscr.refresh()
             self.last_draw_time = current_time
-            
+
         except curses.error:
             pass
 
@@ -158,7 +162,7 @@ class ProjectConsole:
         try:
             while self.running:
                 self.draw_menu()
-                
+
                 try:
                     key = self.stdscr.getch()
                     if key == -1:
@@ -321,7 +325,7 @@ class ProjectConsole:
             self.command_output.append("Failed to start environment.")
         else:
             self.command_output.append(f"Successfully started {self.current_env.value} environment")
-        
+
         self.draw_menu()
 
     def quick_down(self) -> None:
@@ -409,7 +413,7 @@ class ProjectConsole:
                         self.command_output.append(f"  • {service_name} ({status})")
         else:
             self.command_output.append("Error getting status.")
-        
+
         self.draw_menu()
 
     def quick_logs(self) -> None:
@@ -443,7 +447,7 @@ class ProjectConsole:
         envs = list(Environment)
         current_index = envs.index(self.current_env)
         new_env = envs[(current_index + 1) % len(envs)]
-        
+
         new_compose = Path(self.compose_file(new_env))
         if not new_compose.exists():
             self.command_output.append(f"Warning: No compose file found for {new_env.value}")
@@ -470,10 +474,10 @@ class ProjectConsole:
         """Exit the application."""
         self.running = False
 
+
 def main() -> None:
     """Main entry point."""
     debug_mode = "--debug" in sys.argv
-
     try:
         if debug_mode:
             print("Starting ProjectConsole in debug mode...")
@@ -483,7 +487,7 @@ def main() -> None:
             print("Starting ProjectConsole...")
 
         os.system("clear" if os.name == "posix" else "cls")
-        
+
         try:
             curses.setupterm()
         except Exception as e:
@@ -499,7 +503,7 @@ def main() -> None:
                 import traceback
                 traceback.print_exc()
             sys.exit(1)
-            
+
     except KeyboardInterrupt:
         print("\nExiting due to keyboard interrupt...")
     except Exception as e:
@@ -514,6 +518,7 @@ def main() -> None:
             curses.endwin()
         except Exception:
             pass
+
 
 if __name__ == "__main__":
     main()
