@@ -11,8 +11,8 @@ from src.utils.logging import logger
 _token_blacklist: Set[str] = set()
 
 
-def create_access_token(data: Dict, refresh_jti: str = None) -> str:
-    """Create a new access token."""
+def create_access_token(data: Dict, refresh_jti: str = None) -> tuple[str, str]:
+    """Create a new access token and return the token along with its JTI."""
     jti = str(uuid.uuid4())
     to_encode = data.copy()
     audience = (
@@ -31,13 +31,15 @@ def create_access_token(data: Dict, refresh_jti: str = None) -> str:
             "aud": audience,
         }
     )
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    encoded_token = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
+    return encoded_token, jti
 
 
-def create_refresh_token(data: Dict) -> str:
+def create_refresh_token(data: Dict, access_jti: str = None) -> str:
     """Create a new refresh token."""
     jti = str(uuid.uuid4())
-    access_jti = str(uuid.uuid4())
     to_encode = data.copy()
     audience = (
         "test-audience" if settings.ENVIRONMENT == "test" else settings.TOKEN_AUDIENCE
@@ -46,7 +48,7 @@ def create_refresh_token(data: Dict) -> str:
     to_encode.update(
         {
             "jti": jti,
-            "access_jti": access_jti,
+            "access_jti": access_jti,  # Link to the access token's JTI
             "type": "refresh",
             "exp": datetime.utcnow()
             + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),

@@ -8,7 +8,6 @@ from src.core.token_manager import (
     create_refresh_token,
     decode_token,
     invalidate_token,
-    _token_blacklist,
 )
 from src.db.repositories import get_user_by_email
 from src.db.session import get_db
@@ -38,8 +37,8 @@ async def login(
 
     # Create tokens with user claims
     claims = {"user_id": user.id}
-    access_token = create_access_token(claims)
-    refresh_token = create_refresh_token(claims)
+    access_token, access_jti = create_access_token(claims)
+    refresh_token = create_refresh_token(claims, access_jti=access_jti)
 
     return {
         "access_token": access_token,
@@ -56,22 +55,22 @@ async def refresh_token_endpoint(token: str = Depends(oauth2_scheme)):
         payload = decode_token(token, token_type="refresh")
         user_id = payload.get("user_id")
 
-        # Create new access token
-        new_access_token = create_access_token({"user_id": user_id})
-        logger.info(f"Created new access token for user {user_id}")
-
-        # Invalidate the old access token if present in payload
-        if "access_token" in payload:
-            logger.info("Found old access token in refresh payload, invalidating...")
-            invalidate_token(payload["access_token"])
-        else:
-            logger.warning("No access token found in refresh token payload")
-
-        # Invalidate the used refresh token
+        # Invalidate the used refresh token (which also invalidates linked access token)
         logger.info("Invalidating used refresh token")
         invalidate_token(token)
 
-        return {"access_token": new_access_token, "token_type": "bearer"}
+        # Create new token pair
+        new_access_token, new_access_jti = create_access_token({"user_id": user_id})
+        new_refresh_token = create_refresh_token(
+            {"user_id": user_id}, access_jti=new_access_jti
+        )
+        logger.info(f"Created new access token for user {user_id}")
+
+        return {
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
+            "token_type": "bearer",
+        }
     except InvalidTokenError as e:
         logger.error(f"Invalid token error during refresh: {str(e)}")
         raise HTTPException(
