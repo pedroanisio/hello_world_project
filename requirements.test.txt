@@ -7,5 +7,6 @@ httpx
 flake8
 black
 isort
-bandit
-safety
+bandit>=1.7.5
+safety>=2.3.5
+semgrep>=1.34.0
