@@ -74,6 +74,20 @@ The `test.sh` script is executed when the testing environment is launched, runni
 pytest --cov=src --cov-report=term-missing
 ```
 
+To run tests using Docker Compose (*from basepath*):
+
+```bash
+docker compose -f devops/docker-compose.test.yml --env-file devops/.env.test run --rm test
+```
+
+**Expected Output:**
+
+*Test results summary*
+
+*Coverage report indicating which parts of the code were tested*
+
+*Any errors or failures in test execution*
+
 ---
 
 ## **Directory & File Overview**

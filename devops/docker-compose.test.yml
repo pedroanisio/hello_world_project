@@ -1,5 +1,5 @@
 services:
-  web:
+  test:
     env_file:
       - .env.test  
     container_name: ${COMPOSE_PROJECT_NAME:-api}_web_${ENVIRONMENT:-test}
