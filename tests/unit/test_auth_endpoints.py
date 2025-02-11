@@ -73,12 +73,14 @@ def test_refresh_token(client, test_db):
 
 def test_protected_route(client):
     """Test protected route access"""
-    # Create a test token
-    token = create_access_token({"sub": "test@example.com"})
+    # Create a test token - properly unpack the tuple
+    token_str, _ = create_access_token(
+        {"user_id": 1}
+    )  # Changed from 'sub' to 'user_id'
 
     # Test with valid token
     response = client.get(
-        "/api/v1/auth/protected", headers={"Authorization": f"Bearer {token}"}
+        "/api/v1/auth/protected", headers={"Authorization": f"Bearer {token_str}"}
     )
     assert response.status_code == 200
 

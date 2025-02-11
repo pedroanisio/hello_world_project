@@ -76,18 +76,14 @@ def decode_token(token: str, token_type: str = "access") -> Dict:
             else settings.TOKEN_AUDIENCE
         )
 
-        # First check blacklist without verification
-        unverified_payload = jwt.decode(token, options={"verify_signature": False})
-        if (
-            "jti" in unverified_payload
-            and unverified_payload["jti"] in _token_blacklist
-        ):
-            raise InvalidTokenError("Token has been invalidated")
-
-        # Now do full validation
+        # First decode and validate the token
         payload = jwt.decode(
             token, secret_key, algorithms=[settings.ALGORITHM], audience=audience
         )
+
+        # Then check if it's blacklisted
+        if "jti" in payload and payload["jti"] in _token_blacklist:
+            raise InvalidTokenError("Token has been invalidated")
 
         if payload.get("type") != token_type:
             raise InvalidTokenError("Invalid token type")
@@ -111,7 +107,27 @@ def invalidate_token_by_jti(jti: str) -> None:
 def invalidate_token(token: str) -> None:
     """Decode and blacklist token by JTI, and optionally also blacklist its linked access_jti."""
     try:
-        payload = jwt.decode(token, options={"verify_signature": False})
+        # Use the appropriate secret key based on token type
+        unverified = jwt.decode(token, options={"verify_signature": False})
+        token_type = unverified.get("type", "access")
+        secret_key = (
+            settings.REFRESH_SECRET_KEY
+            if token_type == "refresh"
+            else settings.SECRET_KEY
+        )
+
+        # Properly verify the token before invalidating
+        payload = jwt.decode(
+            token,
+            secret_key,
+            algorithms=[settings.ALGORITHM],
+            audience=(
+                "test-audience"
+                if settings.ENVIRONMENT == "test"
+                else settings.TOKEN_AUDIENCE
+            ),
+        )
+
         jti = payload.get("jti")
         if jti:
             invalidate_token_by_jti(jti)

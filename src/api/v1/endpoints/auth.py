@@ -101,5 +101,14 @@ async def protected_route(token: str = Depends(oauth2_scheme)):
 
 @router.post("/logout")
 async def logout(token: str = Depends(oauth2_scheme)):
-    # In a real implementation, you might want to blacklist the token
-    return {"status": "success"}
+    """Logout endpoint that invalidates the current token."""
+    try:
+        # Invalidate the current access token
+        invalidate_token(token)
+        logger.info("Token invalidated during logout")
+        return {"status": "success", "detail": "Successfully logged out"}
+    except InvalidTokenError as e:
+        logger.error(f"Error during logout: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
