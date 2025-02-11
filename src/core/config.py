@@ -1,7 +1,8 @@
 # src/core/config.py
 from typing import Any, Dict
 
-from pydantic import BaseSettings, validator
+from pydantic import field_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -9,10 +10,15 @@ class Settings(BaseSettings):
     PROJECT_NAME: str  # Name of your project
     API_VERSION: str  # API version (e.g., "1.0.0")
     ENVIRONMENT: str = "dev"  # Environment setting (dev/test/prod) with default="dev"
+    COMPOSE_PROJECT_NAME: str = "api"
 
     # Database Configuration
     DATABASE_URL: str  # Main database connection string
     TEST_DATABASE_URL: str  # Test database connection string
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_DB: str = "app"
+    POSTGRES_HOST: str = "db"
 
     # Security Settings
     SECRET_KEY: str  # JWT/encryption secret key
@@ -28,16 +34,15 @@ class Settings(BaseSettings):
     # Logging Configuration
     LOG_LEVEL: str = "INFO"  # Logging level with default="INFO"
 
-    # New settings
+    # Server Settings
     HOST: str = "127.0.0.1"  # Default to localhost
     PORT: int = 8000
 
-    # Validator method
-    @validator("DATABASE_URL", pre=True)
-    def validate_database_url(cls, v: str, values: Dict[str, Any]) -> str:
-        # If environment is "test", use TEST_DATABASE_URL instead
-        if values.get("ENVIRONMENT") == "test":
-            return values.get("TEST_DATABASE_URL", v)
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def validate_database_url(cls, v: str, info: Dict[str, Any]) -> str:
+        if info.data.get("ENVIRONMENT") == "test":
+            return info.data.get("TEST_DATABASE_URL", v)
         return v
 
     class Config:

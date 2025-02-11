@@ -5,6 +5,7 @@ passlib[bcrypt]==1.7.4
 prometheus-client==0.17.1
 psycopg2-binary
 pydantic[dotenv,email]>=2.0.0
+pydantic-settings>=2.0.0
 PyJWT>=2.8.0
 cryptography>=42.0.0
 python-multipart==0.0.20
