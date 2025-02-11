@@ -50,6 +50,23 @@ Runs on `ubuntu-latest` and includes the following steps:
   8. **Upload Coverage Report**
      - Uses `codecov/codecov-action@v3` to upload the test coverage report.
 
+### **7. Semgrep** (Static Application Security Testing)
+Semgrep performs advanced static code analysis to identify security vulnerabilities, 
+bugs, and code quality issues. The project uses Semgrep in CI/CD with the following 
+rulesets:
+- Python standard ruleset
+- OWASP Top Ten vulnerabilities
+- Security audit patterns
+
+To run Semgrep locally using Docker:
+```sh
+docker run --rm -v "${PWD}:/src" returntocorp/semgrep semgrep \
+  --config "p/python" \
+  --config "p/owasp-top-ten" \
+  --config "p/security-audit" \
+  /src
+```
+
 ---
 
 ## **Tools Used**
@@ -135,7 +152,7 @@ docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml ru
   ```
 
 ### **6. Open a Pull Request (PR)**
-- Ensure the PR follows the repository’s PR template.
+- Ensure the PR follows the repository's PR template.
 - Reference any related issues.
 - Wait for CI checks and code reviews before merging.
 
@@ -145,6 +162,8 @@ docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml ru
 - Follow PEP8 coding standards.
 - Keep dependencies updated and use security tools like `bandit` and `safety`.
 - Ensure all new features include tests and documentation.
+- Maintain a minimum of 70% test coverage for all code contributions. Pull requests 
+  with coverage below this threshold will automatically fail CI checks.
 
 For any questions, reach out via GitHub issues or discussions!
 
