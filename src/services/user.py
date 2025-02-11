@@ -6,7 +6,9 @@ from src.core.exceptions import PasswordTooWeakException
 
 def user_create_service(db: Session, email: str, password: str):
     if not validate_password_strength(password):
-        raise PasswordTooWeakException("Password must be at least 8 characters, contain letters and numbers.")
+        raise PasswordTooWeakException(
+            "Password must be at least 8 characters and contain letters and numbers."
+        )
     return create_user_repo(db, email, password)
 
 def user_read_service(db: Session, user_id: int):
