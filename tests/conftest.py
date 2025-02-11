@@ -24,6 +24,7 @@ def test_db():
 @pytest.fixture
 def client(test_db):
     """Create test client with database session"""
+
     def override_get_db():
         try:
             db = test_db()

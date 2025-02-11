@@ -14,7 +14,7 @@ def seed_database():
         if not db.query(User).filter(User.email == user_data["email"]).first():
             user = User(
                 email=user_data["email"],
-                hashed_password=get_password_hash(user_data["password"])
+                hashed_password=get_password_hash(user_data["password"]),
             )
             db.add(user)
     db.commit()

@@ -15,14 +15,9 @@ from src.api.v1.routers import api_router
 
 # Metrics
 REQUEST_COUNT = Counter(
-    'http_requests_total',
-    'Total HTTP requests',
-    ['method', 'endpoint', 'status']
+    "http_requests_total", "Total HTTP requests", ["method", "endpoint", "status"]
 )
-REQUEST_LATENCY = Histogram(
-    'http_request_duration_seconds',
-    'HTTP request latency'
-)
+REQUEST_LATENCY = Histogram("http_request_duration_seconds", "HTTP request latency")
 
 # Structured logging
 logger = structlog.get_logger()
@@ -43,7 +38,7 @@ def create_app() -> FastAPI:
         - Structured Logging
         - Database Integration
         - Error Handling
-        """
+        """,
     )
 
     # Configure CORS
@@ -68,7 +63,7 @@ def create_app() -> FastAPI:
         REQUEST_COUNT.labels(
             method=request.method,
             endpoint=request.url.path,
-            status=response.status_code
+            status=response.status_code,
         ).inc()
         REQUEST_LATENCY.observe(time.time() - start_time)
         return response
@@ -96,4 +91,5 @@ async def custom_swagger_ui_html():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
