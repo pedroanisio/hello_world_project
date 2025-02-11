@@ -1,14 +1,23 @@
 version: "3.9"
 
+networks:
+  frontend:
+    name: ${COMPOSE_PROJECT_NAME:-api}_frontend
+  backend:
+    name: ${COMPOSE_PROJECT_NAME:-api}_backend
+    internal: true  # No external access
+
 services:
   redis:
-    container_name: appname-redis-prod
+    container_name: ${COMPOSE_PROJECT_NAME:-api}-redis-${ENVIRONMENT:-prod}
     image: redis:alpine
     volumes:
       - redis_data:/data
+    networks:
+      - backend
 
   web:
-    container_name: appname-web-prod
+    container_name: ${COMPOSE_PROJECT_NAME:-api}-web-${ENVIRONMENT:-prod}
     build:
       context: ..
       dockerfile: devops/Dockerfile
@@ -18,9 +27,12 @@ services:
       - ../.env.prod
     depends_on:
       - db
+    networks:
+      - frontend
+      - backend
 
   db:
-    container_name: appname-db-prod
+    container_name: ${COMPOSE_PROJECT_NAME:-api}-db-${ENVIRONMENT:-prod}
     image: postgres:16
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-user}
@@ -34,7 +46,9 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - postgres_data:/var/lib/postgresql/data      
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
 volumes:
   redis_data:
   postgres_data:

@@ -61,6 +61,25 @@ echo "Starting application..."
 uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
+### Running the application
+
+Running the application using Docker Compose (*from basepath*):
+
+```bash
+docker compose -f devops/docker-compose.dev.yml --env-file devops/.env.dev up --build
+```
+
+> [!IMPORTANT]
+> - The application will be available at `http://localhost:8000`
+> - The application will hot reload when the code changes
+
+### Cleanup
+
+To stop and remove all containers, networks, and volumes created by Docker Compose:
+
+```bash
+docker compose -f devops/docker-compose.dev.yml --env-file devops/.env.dev down -v
+```
 ---
 
 ## **Testing Process**
@@ -87,6 +106,30 @@ docker compose -f devops/docker-compose.test.yml --env-file devops/.env.test run
 *Coverage report indicating which parts of the code were tested*
 
 *Any errors or failures in test execution*
+
+---
+
+### Docker Cleanup
+
+```shell
+docker volume rm $(docker volume ls -q)
+```
+
+```shell
+docker network rm $(docker network ls -q)
+```
+
+```shell
+docker container rm $(docker container ls -q)
+```
+
+```shell
+docker image rm $(docker image ls -q)
+```
+
+```shell
+docker system prune -a
+```
 
 ---
 
