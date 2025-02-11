@@ -6,7 +6,7 @@ services:
     restart: "no"
     build:
       context: ..
-      dockerfile: devops/Dockerfile
+      dockerfile: devops/Dockerfile.test
     depends_on:
       - db
     environment:
