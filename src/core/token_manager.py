@@ -102,14 +102,20 @@ def decode_token(token: str, token_type: str = "access") -> Dict:
         raise InvalidTokenError(str(e))
 
 
+def invalidate_token_by_jti(jti: str) -> None:
+    """Add a token JTI to the blacklist."""
+    _token_blacklist.add(jti)
+    logger.info(f"Token {jti} added to blacklist")
+
+
 def invalidate_token(token: str) -> None:
-    """Add a token to the blacklist."""
+    """Decode and blacklist token by JTI, and optionally also blacklist its linked access_jti."""
     try:
         payload = jwt.decode(token, options={"verify_signature": False})
-        if "jti" in payload:
-            _token_blacklist.add(payload["jti"])
+        jti = payload.get("jti")
+        if jti:
+            invalidate_token_by_jti(jti)
             if payload.get("type") == "refresh" and "access_jti" in payload:
-                _token_blacklist.add(payload["access_jti"])
-            logger.info(f"Token {payload['jti']} added to blacklist")
+                invalidate_token_by_jti(payload["access_jti"])
     except jwt.PyJWTError as e:
         raise InvalidTokenError(f"Could not invalidate token: {str(e)}")

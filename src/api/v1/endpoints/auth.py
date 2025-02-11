@@ -8,6 +8,7 @@ from src.core.token_manager import (
     create_refresh_token,
     decode_token,
     invalidate_token,
+    invalidate_token_by_jti,
 )
 from src.db.repositories import get_user_by_email
 from src.db.session import get_db
@@ -52,30 +53,28 @@ async def login(
 @router.post("/refresh")
 async def refresh_token_endpoint(token: str = Depends(oauth2_scheme)):
     try:
-        # Verify and decode refresh token
+        # Decode refresh token
         logger.info("Attempting to refresh token")
         payload = decode_token(token, token_type="refresh")
-        user_id = payload.get("user_id")
 
-        # Invalidate the old access token using access_jti from refresh token
-        if "access_jti" in payload:
-            logger.info(
-                f"Invalidating old access token with JTI: {payload['access_jti']}"
-            )
-            _token_blacklist.add(payload["access_jti"])
-        else:
-            logger.warning("No access token found in refresh token payload")
+        # Invalidate old access token JTI if present
+        old_access_jti = payload.get("access_jti")
+        if old_access_jti:
+            logger.info(f"Invalidating old access token with JTI: {old_access_jti}")
+            invalidate_token_by_jti(old_access_jti)
 
         # Invalidate the used refresh token
         logger.info("Invalidating used refresh token")
         invalidate_token(token)
 
         # Create new token pair
-        new_access_token, new_access_jti = create_access_token({"user_id": user_id})
-        new_refresh_token = create_refresh_token(
-            {"user_id": user_id}, access_jti=new_access_jti
+        new_access_token, new_access_jti = create_access_token(
+            {"user_id": payload.get("user_id")}
         )
-        logger.info(f"Created new access token for user {user_id}")
+        new_refresh_token = create_refresh_token(
+            {"user_id": payload.get("user_id")}, access_jti=new_access_jti
+        )
+        logger.info(f"Created new access token for user {payload.get('user_id')}")
 
         return {
             "access_token": new_access_token,
