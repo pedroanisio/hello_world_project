@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   web:
+    container_name: appname-web-test
     env_file:
       - .env.test
     build:
@@ -15,6 +16,7 @@ services:
     entrypoint: ["/app/devops/scripts/test.sh"]
 
   db:
+    container_name: appname-db-test
     image: postgres:16
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-user}

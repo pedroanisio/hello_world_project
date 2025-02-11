@@ -2,11 +2,13 @@ version: "3.9"
 
 services:
   redis:
+    container_name: appname-redis-prod
     image: redis:alpine
     volumes:
       - redis_data:/data
 
   web:
+    container_name: appname-web-prod
     build:
       context: ..
       dockerfile: devops/Dockerfile
@@ -18,6 +20,7 @@ services:
       - db
 
   db:
+    container_name: appname-db-prod
     image: postgres:16
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-user}

@@ -1,6 +1,6 @@
 services:
   redis:
-    container_name: redis
+    container_name: appname-redis-dev
     image: redis:alpine
     ports:
       - "6379:6379"
@@ -8,7 +8,7 @@ services:
       - redis_data:/data
 
   web:
-    container_name: web
+    container_name: appname-web-dev
     build:
       context: ..
       dockerfile: devops/Dockerfile
@@ -26,7 +26,7 @@ services:
     entrypoint: ["/app/devops/scripts/startup.sh"]
 
   db:
-    container_name: db
+    container_name: appname-db-dev
     image: postgres:16
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
