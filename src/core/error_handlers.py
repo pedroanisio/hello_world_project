@@ -47,7 +47,7 @@ def setup_exception_handlers(app: FastAPI) -> None:
         request: Request, exc: StarletteHTTPException
     ) -> JSONResponse:
         logger.error(
-            "http_exception", detail=str(exc.detail), status_code=exc.status_code
+            "http_exception - status_code=%s detail=%s", exc.status_code, exc.detail
         )
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
@@ -55,12 +55,12 @@ def setup_exception_handlers(app: FastAPI) -> None:
     async def validation_exception_handler(
         request: Request, exc: RequestValidationError
     ) -> JSONResponse:
-        logger.error("validation_error", errors=exc.errors())
+        logger.error("validation_error - errors=%s", exc.errors())
         return JSONResponse(status_code=422, content={"detail": exc.errors()})
 
     @app.exception_handler(CustomAppException)
     async def custom_app_exception_handler(
         request: Request, exc: CustomAppException
     ) -> JSONResponse:
-        logger.error("custom_app_exception", message=exc.message)
+        logger.error("custom_app_exception - message=%s", exc.message)
         return JSONResponse(status_code=500, content={"detail": exc.message})

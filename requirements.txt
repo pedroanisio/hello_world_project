@@ -16,4 +16,4 @@ structlog==22.3.0
 uvicorn==0.22.0
 argon2_cffi
 alembic
-jwt
+# python-jose==3.3.0

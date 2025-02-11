@@ -25,6 +25,20 @@ class Settings(BaseSettings):
     REFRESH_SECRET_KEY: str  # JWT refresh token secret key
     ALGORITHM: str = "HS256"  # JWT encryption algorithm (default="HS256")
 
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    TOKEN_ISSUER: str = "your-app-name"
+    TOKEN_AUDIENCE: str = "your-app-users"
+    LOGIN_RATE_LIMIT_REQUESTS: int = 20
+    LOGIN_RATE_LIMIT_WINDOW: int = 60
+
+    # Auth Settings
+    AUTH_SECRET_KEY: str
+    AUTH_REFRESH_SECRET_KEY: str
+    AUTH_ALGORITHM: str = "HS256"
+    AUTH_TOKEN_ISSUER: str = "fastapi-auth-service"
+    AUTH_TOKEN_AUDIENCE: str = "fastapi-users"
+
     # CORS Configuration
     ALLOWED_ORIGINS: str  # Allowed origins for CORS (Cross-Origin Resource Sharing)
 

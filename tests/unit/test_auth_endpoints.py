@@ -1,3 +1,93 @@
+import pytest
+from fastapi.testclient import TestClient
+from unittest.mock import Mock
+
+from src.core.security import create_access_token
+from src.db.models.user import User
+from src.core.security import get_password_hash
+
+
 def test_auth_endpoints():
     # Placeholder for auth endpoints unit tests
     assert True, "Implement auth endpoints unit tests here."
+
+
+def test_login_success(client, test_db):
+    """Test successful login attempt"""
+    # Setup test user
+    db = test_db()
+    test_user = User(
+        email="test@example.com", hashed_password=get_password_hash("TestPass123")
+    )
+    db.add(test_user)
+    db.commit()
+
+    # Test login
+    response = client.post(
+        "/api/v1/auth/login",
+        data={"username": "test@example.com", "password": "TestPass123"},
+    )
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+    assert "token_type" in response.json()
+    assert response.json()["token_type"] == "bearer"
+
+
+def test_login_invalid_credentials(client):
+    """Test login with invalid credentials"""
+    response = client.post(
+        "/api/v1/auth/login",
+        data={"username": "wrong@example.com", "password": "WrongPass123"},
+    )
+
+    assert response.status_code == 401
+    assert "detail" in response.json()
+
+
+def test_refresh_token(client, test_db):
+    """Test token refresh functionality"""
+    # Setup test user
+    db = test_db()
+    test_user = User(
+        email="refresh@example.com", hashed_password=get_password_hash("TestPass123")
+    )
+    db.add(test_user)
+    db.commit()
+
+    # Get initial tokens
+    response = client.post(
+        "/api/v1/auth/login",
+        data={"username": "refresh@example.com", "password": "TestPass123"},
+    )
+    refresh_token = response.json()["refresh_token"]
+
+    # Test refresh
+    response = client.post(
+        "/api/v1/auth/refresh", headers={"Authorization": f"Bearer {refresh_token}"}
+    )
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+
+
+def test_protected_route(client):
+    """Test protected route access"""
+    # Create a test token
+    token = create_access_token({"sub": "test@example.com"})
+
+    # Test with valid token
+    response = client.get(
+        "/api/v1/auth/protected", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+
+    # Test without token
+    response = client.get("/api/v1/auth/protected")
+    assert response.status_code == 401
+
+    # Test with invalid token
+    response = client.get(
+        "/api/v1/auth/protected", headers={"Authorization": "Bearer invalid.token.here"}
+    )
+    assert response.status_code == 401
