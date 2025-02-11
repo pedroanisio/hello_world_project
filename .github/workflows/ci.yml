@@ -57,11 +57,15 @@ jobs:
           bandit -r src/
           safety check -i 68094 -i 73725 -i 70716 -i 70715 -i 64396 -i 64459
         
-      - name: Run tests
+      - name: Run tests and check coverage
         run: |
-          pytest --cov=src --cov-report=xml --cov-report=term-missing
-          
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
+          pytest --cov=src --cov-report=term-missing --cov-report=xml > coverage.txt
+          COVERAGE=$(grep -oP '(?<=TOTAL\s+)\d+' coverage.txt)
+          echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
+
+      - name: Fail if coverage < 70%
+        run: |
+          if [ "$COVERAGE" -lt 70 ]; then
+            echo "Test coverage is too low: $COVERAGE%"
+            exit 1
+          fi
