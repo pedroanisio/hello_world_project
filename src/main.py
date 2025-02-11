@@ -92,9 +92,9 @@ async def custom_swagger_ui_html():
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     # Use localhost by default, override with environment variable if needed
-    host = settings.HOST if hasattr(settings, 'HOST') else "127.0.0.1"
-    port = settings.PORT if hasattr(settings, 'PORT') else 8000
-    
+    host = settings.HOST if hasattr(settings, "HOST") else "127.0.0.1"
+    port = settings.PORT if hasattr(settings, "PORT") else 8000
+
     uvicorn.run(app, host=host, port=port)
