@@ -7,7 +7,7 @@ from src.core.config import settings
 from src.db.models import Base
 from src.db.session import get_db
 from src.main import app
-from src.core.security import create_access_token
+from src.core.token_manager import create_access_token
 
 
 @pytest.fixture
@@ -16,7 +16,8 @@ def auth_headers():
     access_token = create_access_token(
         {
             "user_id": 1,
-            "aud": settings.TOKEN_AUDIENCE,  # Make sure audience is set correctly
+            "type": "access",
+            "aud": "test-audience",  # Explicitly set test audience
         }
     )
     return {"Authorization": f"Bearer {access_token}"}

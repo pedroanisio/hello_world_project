@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from src.utils.logging import logger
-from src.core.security import verify_password, verify_token
+from src.core.security import verify_password
 from src.core.token_manager import (
     create_access_token,
     create_refresh_token,
@@ -35,8 +35,8 @@ async def login(
             detail="Incorrect email or password",
         )
 
-    # Create tokens with user claims and type
-    claims = {"user_id": user.id, "type": "access"}  # Explicitly set token type
+    # Create tokens with user claims
+    claims = {"user_id": user.id}
     access_token = create_access_token(claims)
     refresh_token = create_refresh_token(claims)
 
@@ -80,11 +80,13 @@ async def refresh_token_endpoint(token: str = Depends(oauth2_scheme)):
 
 @router.get("/protected")
 async def protected_route(token: str = Depends(oauth2_scheme)):
-    if not verify_token(token):
+    try:
+        payload = decode_token(token, token_type="access")
+        return {"status": "success", "user_id": payload.get("user_id")}
+    except InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         )
-    return {"status": "success"}
 
 
 @router.post("/logout")
