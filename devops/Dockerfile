@@ -10,6 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Runtime stage
 FROM python:3.11-slim-bookworm
 
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 WORKDIR /app
 
 # Install OS dependencies
@@ -24,6 +27,16 @@ COPY --from=builder /usr/local/bin/ /usr/local/bin/
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV ENVIRONMENT=dev
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Copy the project files into the container
 COPY . .
+
+# Set ownership and switch to non-root user
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Fix permissions and line endings for scripts
+RUN find /app/devops/scripts -type f -name "*.sh" -exec chmod +x {} \; && \
+    find /app/devops/scripts -type f -name "*.sh" -exec sed -i 's/\r$//' {} \;
