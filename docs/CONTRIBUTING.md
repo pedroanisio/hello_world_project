@@ -1,22 +1,25 @@
 # Contribution Guidelines
 
 ## Development Environment
-This project enforces full development and testing within **Docker**. All examples and execution should use **Docker Compose** to ensure consistency across different environments.
+This project enforces full development and testing within **Docker**. All examples 
+and execution should use **Docker Compose** to ensure consistency across different 
+environments.
 
 To set up the environment:
 ```sh
-docker compose --env-files devops/.env.dev -f devops/docker-compose.dev.yml up --build
+docker compose --env-file devops/.env.dev -f devops/docker-compose.dev.yml up --build
 ```
 
 To run tests inside the container:
 ```sh
-docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml run --rm test
+docker compose --env-file devops/.env.test -f devops/docker-compose.test.yml run --rm test
 ```
 
 ---
 
 ## **CI/CD Workflow Overview**
-This project uses **GitHub Actions** for CI/CD automation. The workflow is triggered on the following events:
+This project uses **GitHub Actions** for CI/CD automation. The workflow is triggered 
+on the following events:
 - Pushes to `main` and `develop` branches.
 - Pull requests targeting `main` and `develop` branches.
 
@@ -54,37 +57,43 @@ Runs on `ubuntu-latest` and includes the following steps:
 ### **1. Black** (Code Formatter)
 Black is an opinionated Python code formatter that enforces a consistent style.
 ```sh
-docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml run --rm test black . --check
+docker compose --env-file devops/.env.test -f devops/docker-compose.test.yml run \
+--rm test black . --check
 ```
 
 ### **2. Flake8** (Code Linter)
 Flake8 checks for style guide enforcement and potential errors.
 ```sh
-docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml run --rm test flake8 .
+docker compose --env-file devops/.env.test -f devops/docker-compose.test.yml run \
+--rm test flake8 .
 ```
 
 ### **3. Isort** (Import Sorting)
 Isort ensures Python imports are properly ordered.
 ```sh
-docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml run --rm test isort . --check-only
+docker compose --env-file devops/.env.test -f devops/docker-compose.test.yml run \
+--rm test isort . --check-only
 ```
 
 ### **4. Bandit** (Security Scanner)
 Bandit analyzes Python code for security vulnerabilities.
 ```sh
-docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml run --rm test bandit -r src/
+docker compose --env-file devops/.env.test -f devops/docker-compose.test.yml run \
+--rm test bandit -r src/
 ```
 
 ### **5. Safety** (Dependency Security Check)
 Safety scans installed dependencies for known security vulnerabilities.
 ```sh
-docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml run --rm test safety check
+docker compose --env-file devops/.env.test -f devops/docker-compose.test.yml run \
+--rm test safety check
 ```
 
 ### **6. Pytest** (Testing Framework)
 Pytest runs unit tests and generates coverage reports.
 ```sh
-docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml run --rm test pytest --cov=src --cov-report=xml --cov-report=term-missing
+docker compose --env-file devops/.env.test -f devops/docker-compose.test.yml run \
+--rm test pytest --cov=src --cov-report=xml --cov-report=term-missing
 ```
 
 ---
@@ -106,7 +115,8 @@ docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml ru
 ### **3. Run Tests in Docker**
 Ensure all tests pass before pushing:
 ```sh
-docker compose --env-files devops/.env.test -f devops/docker-compose.test.yml run --rm test pytest --cov=src --cov-report=term-missing
+docker compose --env-file devops/.env.test -f devops/docker-compose.test.yml run \
+--rm test pytest --cov=src --cov-report=term-missing
 ```
 
 ### **4. Lint & Format Code**
