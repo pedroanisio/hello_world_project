@@ -35,6 +35,9 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
+      - name: Copy .env.test
+        run: cp devops/.env.test .env
+
       - name: Install Dependencies
         run: pip install -r requirements.test.txt
 
