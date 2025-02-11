@@ -33,6 +33,9 @@ ENV PYTHONUNBUFFERED=1
 # Copy the project files into the container
 COPY . .
 
+# Copy .env.test to .env
+RUN cp devops/.env.test .env
+
 # Set ownership and switch to non-root user
 RUN chown -R appuser:appuser /app
 USER appuser
