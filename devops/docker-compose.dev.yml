@@ -26,6 +26,8 @@ services:
     entrypoint: ["/app/devops/scripts/startup.sh"]
 
   db:
+    env_file:
+      - .env.test  
     container_name: appname-db-dev
     image: postgres:16
     environment:
