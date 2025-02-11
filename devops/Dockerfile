@@ -19,6 +19,7 @@ RUN apt-get update && \
 
 # Copy Python packages from builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
 # Set environment variables
 ENV PYTHONPATH=/app

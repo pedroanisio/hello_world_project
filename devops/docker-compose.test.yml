@@ -2,10 +2,10 @@ version: "3.9"
 
 services:
   web:
+    env_file:
+      - .env.test  
     container_name: ${COMPOSE_PROJECT_NAME:-api}_web_${ENVIRONMENT:-test}
     restart: "no"
-    env_file:
-      - .env.test
     build:
       context: ..
       dockerfile: devops/Dockerfile
@@ -17,6 +17,8 @@ services:
     entrypoint: ["/app/devops/scripts/test.sh"]
 
   db:
+    env_file:
+      - .env.test
     container_name: ${COMPOSE_PROJECT_NAME:-api}_db_${ENVIRONMENT:-test}
     restart: "no"
     image: postgres:16
