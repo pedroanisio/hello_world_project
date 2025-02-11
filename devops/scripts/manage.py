@@ -36,7 +36,7 @@ class LogEntry:
 
 class MenuItem:
     """Represents a single menu item that can be selected in the TUI."""
-    def __init__(self, key: str, label: str, description: str, action):
+    def __init__(self, key: str, label: str, description: str, action: callable):
         self.key = key
         self.label = label
         self.description = description

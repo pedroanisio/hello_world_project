@@ -1,26 +1,29 @@
 from datetime import datetime, timedelta
 from typing import Optional
-from jose import JWTError, jwt
+import jwt
 from passlib.context import CryptContext
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 from fastapi.security import OAuth2PasswordBearer
 import re
 
 from src.core.config import settings
+from src.core.exceptions import InvalidTokenError
 
-pwd_context = CryptContext(
-    schemes=["argon2"],
-    deprecated="auto",
-    argon2__rounds=4,
-    argon2__memory_cost=65536,
-    argon2__parallelism=2
-)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+password_hasher = PasswordHasher()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    """Generate a password hash."""
+    return password_hasher.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify a plain password against a hashed password."""
+    try:
+        return password_hasher.verify(hashed_password, plain_password)
+    except VerifyMismatchError:
+        return False
 
 def validate_password_strength(password: str) -> bool:
     """
@@ -29,15 +32,9 @@ def validate_password_strength(password: str) -> bool:
       - Contains letters and numbers
     Adjust as needed for your security policies.
     """
-    if len(password) < 8:
-        return False
-    if not re.search(r"[A-Za-z]", password):
-        return False
-    if not re.search(r"\d", password):
-        return False
-    return True
+    return len(password) >= 8 and any(c.isdigit() for c in password)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Create JWT token with enhanced security"""
     to_encode = data.copy()
     if expires_delta:
@@ -52,13 +49,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         "type": "access"
     })
     
-    return jwt.encode(
+    encoded_jwt = jwt.encode(
         to_encode,
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM
     )
+    return encoded_jwt
 
-def create_refresh_token(data: dict):
+def create_refresh_token(data: dict) -> str:
     """Create refresh token with extended expiry"""
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(days=7)
@@ -69,17 +67,24 @@ def create_refresh_token(data: dict):
         "type": "refresh"
     })
     
-    return jwt.encode(
+    encoded_jwt = jwt.encode(
         to_encode,
         settings.REFRESH_SECRET_KEY,
         algorithm=settings.ALGORITHM
     )
+    return encoded_jwt
+
+def decode_token(token: str) -> dict:
+    try:
+        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    except jwt.PyJWTError:
+        return {}
 
 def verify_token(token: str) -> bool:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return True
-    except JWTError:
+    except jwt.PyJWTError:
         return False
 
 def setup_security(app):

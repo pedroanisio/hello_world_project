@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
-import asyncio
 from src.core.config import settings
 from src.utils.logging import logger
+
 
 engine = create_engine(
     settings.DATABASE_URL,
@@ -15,6 +15,7 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 async def check_db_connection():
     try:
         db = SessionLocal()
@@ -25,6 +26,7 @@ async def check_db_connection():
         return False
     finally:
         db.close()
+
 
 def get_db():
     db = SessionLocal()
