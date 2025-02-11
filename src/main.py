@@ -28,6 +28,7 @@ REQUEST_LATENCY = Histogram(
 logger = structlog.get_logger()
 limiter = Limiter(key_func=get_remote_address)
 
+
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
@@ -35,7 +36,6 @@ def create_app() -> FastAPI:
         version=settings.API_VERSION,
         description="""
         Hello World API - A production-ready FastAPI application.
-        
         Features:
         - Authentication & Authorization
         - Rate Limiting
@@ -81,7 +81,9 @@ def create_app() -> FastAPI:
 
     return app
 
+
 app = create_app()
+
 
 @app.get("/docs", include_in_schema=False)
 async def custom_swagger_ui_html():
@@ -92,6 +94,7 @@ async def custom_swagger_ui_html():
         swagger_js_url="/static/swagger-ui-bundle.js",
         swagger_css_url="/static/swagger-ui.css",
     )
+
 
 if __name__ == "__main__":
     import uvicorn
