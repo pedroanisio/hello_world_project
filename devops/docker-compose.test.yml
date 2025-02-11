@@ -2,7 +2,8 @@ version: "3.9"
 
 services:
   web:
-    container_name: appname-web-test
+    container_name: ${COMPOSE_PROJECT_NAME:-api}_web_${ENVIRONMENT:-test}
+    restart: "no"
     env_file:
       - .env.test
     build:
@@ -16,7 +17,8 @@ services:
     entrypoint: ["/app/devops/scripts/test.sh"]
 
   db:
-    container_name: appname-db-test
+    container_name: ${COMPOSE_PROJECT_NAME:-api}_db_${ENVIRONMENT:-test}
+    restart: "no"
     image: postgres:16
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-user}
