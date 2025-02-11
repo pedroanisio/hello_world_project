@@ -59,13 +59,13 @@ jobs:
         
       - name: Run tests and check coverage
         run: |
-          pytest --cov=src --cov-report=term-missing --cov-report=xml > coverage.txt
-          COVERAGE=$(grep -oP '(?<=TOTAL\s+)\d+' coverage.txt)
+          pytest --cov=src --cov-report=term-missing --cov-report=xml
+          COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(float(root.attrib['line-rate']) * 100)")
           echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
 
       - name: Fail if coverage < 70%
         run: |
-          if [ "$COVERAGE" -lt 70 ]; then
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
             echo "Test coverage is too low: $COVERAGE%"
             exit 1
           fi
