@@ -1,5 +1,5 @@
 # src/core/config.py
-from typing import Any, Dict
+from typing import Any, ClassVar, Dict
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings
@@ -31,8 +31,10 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     TOKEN_AUDIENCE: str = "your-app-users"
     TOKEN_ISSUER: str = "your-app-name"
-    TOKEN_TYPE_ACCESS = "access"  # nosec B105
-    TOKEN_TYPE_REFRESH = "refresh"  # nosec B105
+
+    # Token type constants
+    TOKEN_TYPE_ACCESS: ClassVar[str] = "access"  # nosec B105
+    TOKEN_TYPE_REFRESH: ClassVar[str] = "refresh"  # nosec B105
 
     # Auth Settings
     AUTH_SECRET_KEY: str
