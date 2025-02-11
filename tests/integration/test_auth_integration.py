@@ -47,7 +47,7 @@ def test_concurrent_sessions(client, test_db):
     # Register user
     client.post(
         "/api/v1/users",
-        json={"email": "concurrent@example.com", "password": "ConcurrentTest123"},
+        json={"email": "concurrent@example.com", "password": "ConcurrentTest123!"},
     )
 
     # Login multiple times
@@ -57,7 +57,7 @@ def test_concurrent_sessions(client, test_db):
             "/api/v1/auth/login",
             data={
                 "username": "concurrent@example.com",
-                "password": "ConcurrentTest123",
+                "password": "ConcurrentTest123!",
             },
         )
         assert response.status_code == 200
