@@ -26,11 +26,13 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"  # JWT encryption algorithm (default="HS256")
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    TOKEN_ISSUER: str = "your-app-name"
-    TOKEN_AUDIENCE: str = "your-app-users"
     LOGIN_RATE_LIMIT_REQUESTS: int = 20
     LOGIN_RATE_LIMIT_WINDOW: int = 60
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    TOKEN_AUDIENCE: str = "your-app-users"
+    TOKEN_ISSUER: str = "your-app-name"
+    TOKEN_TYPE_ACCESS = "access"  # nosec B105
+    TOKEN_TYPE_REFRESH = "refresh"  # nosec B105
 
     # Auth Settings
     AUTH_SECRET_KEY: str

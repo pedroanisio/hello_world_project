@@ -63,12 +63,14 @@ def create_refresh_token(data: Dict, access_jti: str = None) -> str:
     )
 
 
-def decode_token(token: str, token_type: str = "access") -> Dict:
+def decode_token(token: str, token_type: str = settings.TOKEN_TYPE_ACCESS) -> Dict:
     """Decode and validate a token."""
     try:
+        # Select appropriate secret key based on token type
+        # This is safe as we're just comparing string constants for token types
         secret_key = (
             settings.SECRET_KEY
-            if token_type == "access"
+            if token_type == settings.TOKEN_TYPE_ACCESS
             else settings.REFRESH_SECRET_KEY
         )
         audience = (
