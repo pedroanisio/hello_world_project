@@ -38,7 +38,9 @@ async def login(
     # Create tokens with user claims
     claims = {"user_id": user.id}
     access_token, access_jti = create_access_token(claims)  # Get both token and JTI
-    refresh_token = create_refresh_token(claims, access_jti=access_jti)  # Pass the real access JTI
+    refresh_token = create_refresh_token(
+        claims, access_jti=access_jti
+    )  # Pass the real access JTI
 
     return {
         "access_token": access_token,
@@ -57,7 +59,9 @@ async def refresh_token_endpoint(token: str = Depends(oauth2_scheme)):
 
         # Invalidate the old access token using access_jti from refresh token
         if "access_jti" in payload:
-            logger.info(f"Invalidating old access token with JTI: {payload['access_jti']}")
+            logger.info(
+                f"Invalidating old access token with JTI: {payload['access_jti']}"
+            )
             _token_blacklist.add(payload["access_jti"])
         else:
             logger.warning("No access token found in refresh token payload")
@@ -68,7 +72,9 @@ async def refresh_token_endpoint(token: str = Depends(oauth2_scheme)):
 
         # Create new token pair
         new_access_token, new_access_jti = create_access_token({"user_id": user_id})
-        new_refresh_token = create_refresh_token({"user_id": user_id}, access_jti=new_access_jti)
+        new_refresh_token = create_refresh_token(
+            {"user_id": user_id}, access_jti=new_access_jti
+        )
         logger.info(f"Created new access token for user {user_id}")
 
         return {

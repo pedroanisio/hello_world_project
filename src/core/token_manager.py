@@ -31,7 +31,9 @@ def create_access_token(data: Dict, refresh_jti: str = None) -> tuple[str, str]:
             "aud": audience,
         }
     )
-    encoded_token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    encoded_token = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
     return encoded_token, jti
 
 
@@ -48,13 +50,16 @@ def create_refresh_token(data: Dict, access_jti: str = None) -> str:
             "jti": jti,
             "access_jti": access_jti,  # Store the actual access token's JTI
             "type": "refresh",
-            "exp": datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+            "exp": datetime.utcnow()
+            + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
             "iat": datetime.utcnow(),
             "iss": settings.TOKEN_ISSUER,
             "aud": audience,
         }
     )
-    return jwt.encode(to_encode, settings.REFRESH_SECRET_KEY, algorithm=settings.ALGORITHM)
+    return jwt.encode(
+        to_encode, settings.REFRESH_SECRET_KEY, algorithm=settings.ALGORITHM
+    )
 
 
 def decode_token(token: str, token_type: str = "access") -> Dict:
