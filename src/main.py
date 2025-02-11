@@ -64,14 +64,12 @@ def create_app() -> FastAPI:
     async def metrics_middleware(request: Request, call_next):
         start_time = time.time()
         response = await call_next(request)
-        
         # Record metrics
         REQUEST_COUNT.labels(
             method=request.method,
             endpoint=request.url.path,
             status=response.status_code
         ).inc()
-        
         REQUEST_LATENCY.observe(time.time() - start_time)
         return response
 

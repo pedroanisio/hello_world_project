@@ -3,6 +3,7 @@ import psycopg2
 import os
 from src.core.config import settings
 
+
 def wait_for_db():
     while True:
         try:
@@ -17,6 +18,7 @@ def wait_for_db():
         except psycopg2.OperationalError:
             print("Waiting for database...")
             time.sleep(1)
+
 
 if __name__ == "__main__":
     wait_for_db()

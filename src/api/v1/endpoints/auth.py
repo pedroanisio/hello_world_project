@@ -8,6 +8,7 @@ from src.db.repositories import get_user_by_email
 
 router = APIRouter(tags=["auth"])
 
+
 @router.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = get_user_by_email(db, form_data.username)
