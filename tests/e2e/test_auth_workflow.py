@@ -10,7 +10,6 @@ def test_complete_auth_workflow(client, test_db):
     register_data = {"email": "e2e@example.com", "password": "E2ETest123!"}
     register_response = client.post("/api/v1/users", json=register_data)
     assert register_response.status_code == 200, register_response.text
-    user_id = register_response.json()["id"]
 
     # 2. Attempt login with wrong password
     wrong_login_response = client.post(

@@ -10,7 +10,6 @@ def test_auth_flow_integration(client, test_db):
         json={"email": "integration@example.com", "password": "IntegrationTest123!"},
     )
     assert register_response.status_code == 200
-    user_id = register_response.json()["id"]
 
     # 2. Login with new user
     login_response = client.post(
