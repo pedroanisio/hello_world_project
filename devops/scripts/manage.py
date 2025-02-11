@@ -11,11 +11,10 @@ from rich.console import Console
 from rich import print as rprint
 import time
 from typing import Optional, List, Dict
-from threading import Thread, Lock
+from threading import Lock
 from collections import deque
 from datetime import datetime
 
-# Path resolution based on script location
 SCRIPT_PATH = Path(__file__).resolve()
 PROJECT_ROOT = Path(os.getcwd()).resolve()  # Use current working directory as project root
 DEVOPS_DIR = PROJECT_ROOT / "devops"
@@ -55,7 +54,7 @@ class ProjectConsole:
         self.command_output = deque(maxlen=15)
         self.command_log: List[LogEntry] = []
         self.last_draw_time = 0
-        
+
         self.init_menu_items()
         self.init_curses()
 
@@ -66,10 +65,10 @@ class ProjectConsole:
         
         # Simple color scheme
         curses.init_pair(1, curses.COLOR_WHITE, -1)  # Default
-        curses.init_pair(2, curses.COLOR_GREEN, -1)  # Selected
-        curses.init_pair(3, curses.COLOR_YELLOW, -1)  # Commands
-        curses.init_pair(4, curses.COLOR_CYAN, -1)    # Header
-        curses.init_pair(5, curses.COLOR_RED, -1)     # Errors
+        curses.init_pair(2, curses.COLOR_GREEN, -1)  # Selected / success
+        curses.init_pair(3, curses.COLOR_YELLOW, -1) # Highlight / command
+        curses.init_pair(4, curses.COLOR_CYAN, -1)   # Header
+        curses.init_pair(5, curses.COLOR_RED, -1)    # Errors
 
         curses.curs_set(0)
         self.stdscr.timeout(500)
@@ -79,8 +78,8 @@ class ProjectConsole:
     def init_menu_items(self) -> None:
         """Initialize menu items."""
         self.menu_items = [
-            MenuItem("u", "Up", f"Start {self.current_env} environment", self.quick_up),
-            MenuItem("d", "Down", f"Stop {self.current_env} environment", self.quick_down),
+            MenuItem("u", "Up", f"Start {self.current_env.value} environment", self.quick_up),
+            MenuItem("d", "Down", f"Stop {self.current_env.value} environment", self.quick_down),
             MenuItem("s", "Status", "Show detailed status", self.quick_status),
             MenuItem("l", "Logs", "View service logs", self.quick_logs),
             MenuItem("p", "Prune", "Clean Docker resources", self.quick_prune),
@@ -92,6 +91,7 @@ class ProjectConsole:
     def draw_menu(self) -> None:
         """Draw the console UI."""
         current_time = time.time()
+        # Avoid redrawing too often
         if current_time - self.last_draw_time < 0.1:
             return
 
@@ -105,7 +105,7 @@ class ProjectConsole:
             self.stdscr.addstr(1, max(0, (width - len(header)) // 2), header, curses.color_pair(4) | curses.A_BOLD)
             self.stdscr.addstr(2, 0, "=" * width, curses.color_pair(4))
 
-            # Draw menu items in a single row
+            # Draw menu items in a single line
             menu_line = []
             for item in self.menu_items:
                 menu_line.append(f"{item.key}:{item.label}")
@@ -115,36 +115,37 @@ class ProjectConsole:
             # Separator
             self.stdscr.addstr(4, 0, "-" * width, curses.color_pair(1))
 
-            # Command output area (expanded)
+            # Command output area
             output_start = 5
             max_output_lines = height - output_start - 1
             
-            for i, line in enumerate(list(self.command_output)[-max_output_lines:]):
-                if output_start + i >= height:
-                    break
-                    
-                # Determine line color based on content
+            lines_to_show = list(self.command_output)[-max_output_lines:]
+            line_idx = 0
+            while line_idx < len(lines_to_show):
+                line = lines_to_show[line_idx]
+
+                # Choose color
                 color = curses.color_pair(1)
-                if "ERROR:" in line and not any(status in line.lower() for status in ["creating", "starting", "running"]):
+                if "ERROR:" in line and not any(k in line.lower() for k in ["creating", "starting", "running"]):
                     color = curses.color_pair(5)
                 elif any(word in line.lower() for word in ["starting", "stopping", "running", "created", "done"]):
                     color = curses.color_pair(2)
-                elif any(word in line for word in ["$", ">", "Executing:"]):
+                elif any(word in line.lower() for word in ["executing: ", "warning: ", ">", "$"]):
                     color = curses.color_pair(3)
-                
-                # Handle long lines by wrapping them
+
+                # Wrap long lines
                 if len(line) > width - 2:
                     wrapped_lines = [line[j:j + width - 3] for j in range(0, len(line), width - 3)]
                     for w_idx, wrapped_line in enumerate(wrapped_lines):
-                        if output_start + i + w_idx >= height:
+                        if output_start + line_idx + w_idx >= height:
                             break
-                        if w_idx == 0:
-                            self.stdscr.addstr(output_start + i + w_idx, 1, wrapped_line, color)
-                        else:
-                            self.stdscr.addstr(output_start + i + w_idx, 3, wrapped_line, color)
-                    i += len(wrapped_lines) - 1
+                        # Indent subsequent wrapped lines
+                        indent = 1 if w_idx == 0 else 3
+                        self.stdscr.addstr(output_start + line_idx + w_idx, indent, wrapped_line, color)
+                    line_idx += len(wrapped_lines)
                 else:
-                    self.stdscr.addstr(output_start + i, 1, line, color)
+                    self.stdscr.addstr(output_start + line_idx, 1, line, color)
+                    line_idx += 1
 
             self.stdscr.refresh()
             self.last_draw_time = current_time
@@ -163,11 +164,12 @@ class ProjectConsole:
                     if key == -1:
                         continue
 
+                    # Press 'q' to quit
                     if key == ord('q'):
                         self.running = False
                         break
 
-                    # Handle shortcut keys
+                    # Shortcut keys
                     if 32 <= key <= 126:
                         char = chr(key).lower()
                         for item in self.menu_items:
@@ -184,38 +186,25 @@ class ProjectConsole:
         finally:
             curses.endwin()
 
-    def process_docker_output(self, line: str) -> str:
-        """Process and format Docker output messages."""
-        # Convert Docker message to more user-friendly format
-        line = line.strip()
-        
-        # Handle network creation messages
-        if "Network" in line and "Creating" in line:
-            return f"INFO: Creating network {line.split()[1]}"
-            
-        # Handle container messages
-        for action in ["Creating", "Starting", "Stopping", "Removing"]:
-            if action in line:
-                parts = line.split()
-                if len(parts) >= 2:
-                    service = parts[0]
-                    return f"INFO: {action} service {service}"
-        
-        return line
-
+    # ----------------------------------------------------------------------
+    # Docker Compose Command Runner (SINGLE IMPLEMENTATION)
+    # ----------------------------------------------------------------------
     def run_compose_command(
         self,
         command: str,
         args: Optional[List[str]] = None,
         env: Optional[Environment] = None
     ) -> subprocess.CompletedProcess:
-        """Run a docker-compose command with enhanced error reporting."""
+        """
+        Run a docker-compose command with real-time output appended to command_output.
+        Returns a CompletedProcess for further inspection (returncode, stdout, stderr).
+        """
         if env is None:
             env = self.current_env
 
         compose_file = self.compose_file(env)
         env_file = DEVOPS_DIR / f".env.{env.value}"
-        
+
         if not Path(compose_file).exists():
             error_msg = f"ERROR: Compose file not found: {compose_file}"
             self.command_output.append(error_msg)
@@ -231,7 +220,6 @@ class ProjectConsole:
         if args:
             cmd.extend(args)
 
-        # Log the command being executed
         cmd_str = " ".join(cmd)
         self.command_output.append(f"Executing: {cmd_str}")
 
@@ -249,86 +237,7 @@ class ProjectConsole:
             all_output = []
             all_errors = []
 
-            while True:
-                output_line = process.stdout.readline()
-                error_line = process.stderr.readline()
-
-                if output_line:
-                    formatted_line = self.process_docker_output(output_line)
-                    all_output.append(output_line)
-                    self.command_output.append(formatted_line)
-
-                if error_line:
-                    formatted_error = self.process_docker_output(error_line)
-                    all_errors.append(error_line)
-                    if "WARNING" in error_line.upper():
-                        self.command_output.append(f"Warning: {formatted_error}")
-                    else:
-                        self.command_output.append(f"ERROR: {formatted_error}")
-
-                if process.poll() is not None:
-                    # Get any remaining output
-                    remaining_out, remaining_err = process.communicate()
-                    if remaining_out:
-                        all_output.append(remaining_out)
-                        for line in remaining_out.splitlines():
-                            formatted_line = self.process_docker_output(line)
-                            self.command_output.append(formatted_line)
-                    if remaining_err:
-                        all_errors.append(remaining_err)
-                        for line in remaining_err.splitlines():
-                            formatted_error = self.process_docker_output(line)
-                            if "WARNING" in line.upper():
-                                self.command_output.append(f"Warning: {formatted_error}")
-                            else:
-                                self.command_output.append(f"ERROR: {formatted_error}")
-                    break
-
-            returncode = process.wait()
-            
-            # Add a summary of the command execution
-            if returncode == 0:
-                self.command_output.append(f"Command completed successfully")
-            else:
-                self.command_output.append(f"Command failed with exit code {returncode}")
-                if not all_errors:
-                    self.command_output.append("No error output was captured. Check if Docker is running and accessible.")
-            
-            return subprocess.CompletedProcess(
-                cmd,
-                returncode,
-                "".join(all_output),
-                "".join(all_errors),
-            )
-
-        except FileNotFoundError:
-            error_msg = "ERROR: Docker command not found. Is Docker installed and in your PATH?"
-            self.command_output.append(error_msg)
-            return subprocess.CompletedProcess(cmd, 1, "", error_msg)
-        except PermissionError:
-            error_msg = "ERROR: Permission denied. Do you have the right permissions to run Docker?"
-            self.command_output.append(error_msg)
-            return subprocess.CompletedProcess(cmd, 1, "", error_msg)
-        except Exception as e:
-            error_msg = f"ERROR: Command failed: {str(e)}"
-            self.command_output.append(error_msg)
-            self.command_output.append("Check if Docker daemon is running with: 'docker info'")
-            return subprocess.CompletedProcess(cmd, 1, "", error_msg)
-
-        try:
-            process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,
-                universal_newlines=True,
-                cwd=str(DEVOPS_DIR)  # Ensure we're in the correct directory
-            )
-
-            all_output = []
-            all_errors = []
-
+            # Read output in real-time
             while True:
                 output_line = process.stdout.readline()
                 error_line = process.stderr.readline()
@@ -339,10 +248,13 @@ class ProjectConsole:
 
                 if error_line:
                     all_errors.append(error_line)
-                    self.command_output.append(f"ERROR: {error_line.strip()}")
+                    if "WARNING" in error_line.upper():
+                        self.command_output.append(f"Warning: {error_line.strip()}")
+                    else:
+                        self.command_output.append(f"ERROR: {error_line.strip()}")
 
                 if process.poll() is not None:
-                    # Get any remaining output
+                    # Grab any remaining output after poll
                     remaining_out, remaining_err = process.communicate()
                     if remaining_out:
                         all_output.append(remaining_out)
@@ -355,15 +267,13 @@ class ProjectConsole:
                     break
 
             returncode = process.wait()
-            
-            # Add a summary of the command execution
             if returncode == 0:
-                self.command_output.append(f"Command completed successfully: {cmd_str}")
+                self.command_output.append(f"Command completed successfully (exit={returncode})")
             else:
-                self.command_output.append(f"Command failed with exit code {returncode}: {cmd_str}")
-                if not all_errors:  # If no specific error message was captured
-                    self.command_output.append("No error output was captured. Check if Docker is running and accessible.")
-            
+                self.command_output.append(f"Command failed with exit code {returncode}")
+                if not all_errors:
+                    self.command_output.append("No error output captured. Check if Docker is running.")
+
             return subprocess.CompletedProcess(
                 cmd,
                 returncode,
@@ -375,53 +285,40 @@ class ProjectConsole:
             error_msg = "ERROR: Docker command not found. Is Docker installed and in your PATH?"
             self.command_output.append(error_msg)
             return subprocess.CompletedProcess(cmd, 1, "", error_msg)
+
         except PermissionError:
             error_msg = "ERROR: Permission denied. Do you have the right permissions to run Docker?"
             self.command_output.append(error_msg)
             return subprocess.CompletedProcess(cmd, 1, "", error_msg)
+
         except Exception as e:
             error_msg = f"ERROR: Command failed: {str(e)}"
             self.command_output.append(error_msg)
             self.command_output.append("Check if Docker daemon is running with: 'docker info'")
             return subprocess.CompletedProcess(cmd, 1, "", error_msg)
 
+    # ----------------------------------------------------------------------
+    # Quick Commands
+    # ----------------------------------------------------------------------
     def quick_up(self) -> None:
         """Start the current environment with detailed error reporting."""
         self.command_output.append(f"Starting {self.current_env.value} environment...")
         self.draw_menu()
-        
-        # Verify docker-compose file exists
-        compose_file = Path(self.compose_file())
-        if not compose_file.exists():
-            self.command_output.append(f"ERROR: Docker compose file not found: {compose_file}")
-            self.command_output.append(f"Expected location: {DEVOPS_DIR}")
-            self.command_output.append("Please check if you're in the correct directory and the file exists.")
-            return
 
-        # Verify docker is running
+        # Optional: Check if Docker is running
         try:
             docker_info = subprocess.run(["docker", "info"], capture_output=True, text=True)
             if docker_info.returncode != 0:
-                self.command_output.append("ERROR: Unable to connect to Docker daemon")
-                self.command_output.append("Please check if Docker is running with: 'docker info'")
+                self.command_output.append("ERROR: Unable to connect to Docker daemon. Is Docker running?")
                 return
         except FileNotFoundError:
-            self.command_output.append("ERROR: Docker command not found")
-            self.command_output.append("Please ensure Docker is installed and in your PATH")
+            self.command_output.append("ERROR: Docker command not found. Install Docker and/or fix PATH.")
             return
 
         # Run the compose command
         result = self.run_compose_command("up -d")
-        if not result or result.returncode != 0:
-            self.command_output.append("Failed to start environment. Details:")
-            if result and result.stderr:
-                for line in result.stderr.splitlines():
-                    self.command_output.append(f"  → {line.strip()}")
-            self.command_output.append("Troubleshooting steps:")
-            self.command_output.append("1. Check if all required images are available")
-            self.command_output.append("2. Verify network connectivity")
-            self.command_output.append("3. Check port conflicts")
-            self.command_output.append("Run 'docker-compose -f docker-compose.dev.yml config' to validate configuration")
+        if result.returncode != 0:
+            self.command_output.append("Failed to start environment.")
         else:
             self.command_output.append(f"Successfully started {self.current_env.value} environment")
         
@@ -486,31 +383,30 @@ class ProjectConsole:
         self.command_output.append(f"Getting status for {self.current_env.value} environment...")
         self.draw_menu()
 
-        # First get services configuration
+        # First get services
         config_result = self.run_compose_command("config --services")
         services = []
-        if config_result and config_result.returncode == 0:
+        if config_result.returncode == 0:
             services = config_result.stdout.strip().split('\n')
             if services:
-                self.command_output.append(f"\nDefined services:")
-                for service in services:
-                    self.command_output.append(f"  • {service}")
+                self.command_output.append("Defined services:")
+                for svc in services:
+                    self.command_output.append(f"  • {svc}")
 
-        # Then get running containers
-        result = self.run_compose_command("ps")
-        if result and result.returncode == 0:
-            if "NAME" not in result.stdout:
-                self.command_output.append("\nNo containers are currently running")
+        # Then ps
+        ps_result = self.run_compose_command("ps")
+        if ps_result and ps_result.returncode == 0:
+            if "NAME" not in ps_result.stdout:
+                self.command_output.append("No containers are currently running.")
             else:
-                self.command_output.append("\nRunning containers:")
-                # Skip header line
-                containers = [line for line in result.stdout.split('\n')[1:] if line.strip()]
-                for container in containers:
-                    parts = container.split()
-                    if len(parts) >= 2:
-                        name = parts[0]
-                        status = "Running" if "Up" in container else "Stopped"
-                        self.command_output.append(f"  • {name}: {status}")
+                self.command_output.append("Running containers:")
+                lines = ps_result.stdout.split('\n')
+                for line in lines[1:]:
+                    if line.strip():
+                        parts = line.split()
+                        service_name = parts[0]
+                        status = "Running" if "Up" in line else "Stopped"
+                        self.command_output.append(f"  • {service_name} ({status})")
         else:
             self.command_output.append("Error getting status.")
         
@@ -548,40 +444,26 @@ class ProjectConsole:
         current_index = envs.index(self.current_env)
         new_env = envs[(current_index + 1) % len(envs)]
         
-        # Verify compose file exists for the new environment
-        new_compose_file = Path(self.compose_file(new_env))
-        if not new_compose_file.exists():
-            self.command_output.append(f"Warning: No compose file found for {new_env.value} environment")
-            self.command_output.append(f"Expected: {new_compose_file}")
+        new_compose = Path(self.compose_file(new_env))
+        if not new_compose.exists():
+            self.command_output.append(f"Warning: No compose file found for {new_env.value}")
             return
-            
-        # Check if current environment has running containers
+
+        # Optional: Check if old environment is running
         result = self.run_compose_command("ps", env=self.current_env)
-        has_running = result and result.returncode == 0 and "Up" in result.stdout
-        
-        if has_running:
-            self.command_output.append(f"Warning: Active containers found in {self.current_env.value} environment")
-            self.command_output.append("Consider stopping them first with 'd' command")
-            
+        if result and "Up" in result.stdout:
+            self.command_output.append("Containers are running in the current environment. Consider stopping them first.")
+
+        # Switch environment
         self.current_env = new_env
         self.command_output.append(f"Switched to {self.current_env.value} environment")
-        
-        # Show available services in new environment
-        config_result = self.run_compose_command("config --services")
-        if config_result and config_result.returncode == 0:
-            services = config_result.stdout.strip().split('\n')
-            if services:
-                self.command_output.append("Available services:")
-                for service in services:
-                    self.command_output.append(f"  • {service}")
-                    
         self.init_menu_items()
+        self.draw_menu()
 
     def compose_file(self, env: Optional[Environment] = None) -> str:
-        """Get compose file path."""
+        """Get compose file path for the given environment."""
         if env is None:
             env = self.current_env
-        # Use .value to get the string value from the Environment enum
         return str(DEVOPS_DIR / f"docker-compose.{env.value}.yml")
 
     def quit_app(self) -> None:
@@ -591,7 +473,7 @@ class ProjectConsole:
 def main() -> None:
     """Main entry point."""
     debug_mode = "--debug" in sys.argv
-    
+
     try:
         if debug_mode:
             print("Starting ProjectConsole in debug mode...")
@@ -600,17 +482,15 @@ def main() -> None:
         else:
             print("Starting ProjectConsole...")
 
-        # Ensure terminal is in a good state
         os.system("clear" if os.name == "posix" else "cls")
         
-        # Initialize curses carefully
         try:
             curses.setupterm()
         except Exception as e:
             if debug_mode:
                 print(f"Warning: Failed to setup terminal: {e}")
 
-        # Start the curses UI
+        # Launch the TUI
         try:
             curses.wrapper(lambda stdscr: ProjectConsole(stdscr).run())
         except curses.error as e:

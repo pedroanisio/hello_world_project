@@ -20,7 +20,7 @@
 - [x] APT cache cleanup
 - [x] PYTHONPATH configuration
 - [x] Environment variables
-- [ ] Multi-stage builds
+- [x] Multi-stage builds
 - [ ] Non-root user creation
 - [ ] .dockerignore file
 
@@ -28,7 +28,7 @@
 - [x] Database health checks
 - [x] Development volume mounts
 - [x] Environment-specific configs
-- [ ] Dynamic container names
+- [x ] Dynamic container names
 - [ ] Resource limits
 - [ ] Restart policies
 - [ ] Network isolation
@@ -166,3 +166,20 @@
 - [ ] Response times
 - [ ] Cost tracking
 - [ ] Security events
+
+## Project Management Tools
+
+This projects uses an internal tool for running commands against the docker compose files.
+it should be executed from the root of the project by running `./devops/scripts/manage.py`
+
+it is a terminal UI that allows you to manage the project.
+
+it has the following commands:
+
+- `up` - starts the project
+- `down` - stops the project
+- `status` - shows the status of the project
+- `logs` - shows the logs of the project
+- `test` - runs the tests
+- `prune` - prunes the project
+- `environment` - shows the current environment
