@@ -6,7 +6,7 @@ from src.core.exceptions import InvalidTokenError
 from src.core.token_manager import decode_token
 from src.db.session import get_db
 from src.utils.logging import logger
-from src.config import settings
+from src.core.config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
