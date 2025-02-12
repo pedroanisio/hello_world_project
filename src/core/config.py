@@ -71,7 +71,7 @@ class Settings(BaseSettings):
         """Construct database URL based on environment"""
         if info.data.get("ENVIRONMENT") == "test":
             host = info.data.get("POSTGRES_TEST_HOST", "localhost")
-            return f"postgresql://{info.data.get('POSTGRES_USER')}:{info.data.get('POSTGRES_PASSWORD')}@{host}:5432/{info.data.get('POSTGRES_DB')}_test"
+            return f"postgresql://{info.data.get('POSTGRES_USER')}:{info.data.get('POSTGRES_PASSWORD')}@{host}:5432/{info.data.get('POSTGRES_DB')}"
         return v
 
     class Config:
