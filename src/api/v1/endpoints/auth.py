@@ -52,11 +52,10 @@ async def login(
 
 
 @router.post("/refresh")
-async def refresh_token_endpoint(token: str = Depends(oauth2_scheme)):
+async def refresh_token(token: str = Depends(oauth2_scheme)):
     try:
-        # Decode refresh token
         logger.info("Attempting to refresh token")
-        payload = decode_token(token, token_type="refresh")
+        payload = decode_token(token, token_type=settings.TOKEN_TYPE_REFRESH)
 
         # Invalidate old access token JTI if present
         old_access_jti = payload.get("access_jti")
@@ -89,10 +88,10 @@ async def refresh_token_endpoint(token: str = Depends(oauth2_scheme)):
         )
 
 
-@router.get("/protected")
-async def protected_route(token: str = Depends(oauth2_scheme)):
+@router.post("/verify")
+async def verify_token(token: str = Depends(oauth2_scheme)):
     try:
-        payload = decode_token(token, token_type="access")
+        payload = decode_token(token, token_type=settings.TOKEN_TYPE_ACCESS)
         return {"status": "success", "user_id": payload.get("user_id")}
     except InvalidTokenError:
         raise HTTPException(

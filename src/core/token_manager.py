@@ -112,10 +112,10 @@ def invalidate_token(token: str) -> None:
     try:
         # Use the appropriate secret key based on token type
         unverified = jwt.decode(token, options={"verify_signature": False})
-        token_type = unverified.get("type", "access")
+        token_type = unverified.get("type", settings.TOKEN_TYPE_ACCESS)
         secret_key = (
             settings.REFRESH_SECRET_KEY
-            if token_type == "refresh"
+            if token_type == settings.TOKEN_TYPE_REFRESH
             else settings.SECRET_KEY
         )
 
