@@ -23,10 +23,21 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
       redis:
         image: redis:alpine
         ports:
-          - 6379:6379
+          - 6379:6379          
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+
+
 
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +47,9 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
+
+      - name: Wait for DB
+        run: sleep 10
 
       - name: Copy .env.test
         run: cp devops/.env.test .env
@@ -58,6 +72,8 @@ jobs:
           safety check -i 68094 -i 73725 -i 70716 -i 70715 -i 64396 -i 64459
         
       - name: Run tests and check coverage
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@db:5432/test_db"         
         run: |
           pytest --cov=src --cov-report=term-missing --cov-report=xml
           COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(float(root.attrib['line-rate']) * 100)")
