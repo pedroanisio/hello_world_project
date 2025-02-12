@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_DB: str = "app"
-    POSTGRES_HOST: str = "db"
+    POSTGRES_HOST: str = "db"  # Default for production
+    POSTGRES_TEST_HOST: str = "localhost"  # Add this for testing
 
     # Security Settings
     SECRET_KEY: str  # JWT/encryption secret key
@@ -56,11 +57,21 @@ class Settings(BaseSettings):
     HOST: str = "127.0.0.1"  # Default to localhost
     PORT: int = 8000
 
+    @field_validator("POSTGRES_HOST", mode="before")
+    @classmethod
+    def validate_postgres_host(cls, v: str, info: Dict[str, Any]) -> str:
+        """Use localhost for testing environment"""
+        if info.data.get("ENVIRONMENT") == "test":
+            return info.data.get("POSTGRES_TEST_HOST", "localhost")
+        return v
+
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def validate_database_url(cls, v: str, info: Dict[str, Any]) -> str:
+        """Construct database URL based on environment"""
         if info.data.get("ENVIRONMENT") == "test":
-            return info.data.get("TEST_DATABASE_URL", v)
+            host = info.data.get("POSTGRES_TEST_HOST", "localhost")
+            return f"postgresql://{info.data.get('POSTGRES_USER')}:{info.data.get('POSTGRES_PASSWORD')}@{host}:5432/{info.data.get('POSTGRES_DB')}_test"
         return v
 
     class Config:
