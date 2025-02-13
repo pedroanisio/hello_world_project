@@ -58,3 +58,5 @@ pytest_cache/
 .vscode/
 
 *.log
+src/.env
+.env

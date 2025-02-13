@@ -20,7 +20,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME:-api}-web-${ENVIRONMENT:-prod}
     build:
       context: ..
-      dockerfile: devops/Dockerfile
+      dockerfile: devops/Dockerfile.prod
     ports:
       - "8000:8000"
     env_file:

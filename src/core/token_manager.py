@@ -136,5 +136,6 @@ def invalidate_token(token: str) -> None:
             invalidate_token_by_jti(jti)
             if payload.get("type") == "refresh" and "access_jti" in payload:
                 invalidate_token_by_jti(payload["access_jti"])
+
     except jwt.PyJWTError as e:
         raise InvalidTokenError(f"Could not invalidate token: {str(e)}")
